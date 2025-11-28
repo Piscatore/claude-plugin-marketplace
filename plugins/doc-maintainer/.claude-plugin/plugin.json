@@ -1,0 +1,7 @@
+{
+  "name": "doc-maintainer",
+  "version": "1.1.0",
+  "description": "Specialized agent for documentation indexing, updating, and consistency checking. Supports index-only (read-only) and active maintenance modes.",
+  "author": "AgentPlugins",
+  "agents": ["./agents/"]
+}

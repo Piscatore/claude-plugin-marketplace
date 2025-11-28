@@ -8,44 +8,26 @@ Claude Plugins are specialized agent specifications that define focused behavior
 
 ## Quick Start
 
-### Setup (One-Time)
-
-To enable the `/plugin` command in any project, copy the command file to your home directory:
+### Add the Marketplace (One Command!)
 
 ```bash
-# Clone the marketplace
-git clone https://github.com/Piscatore/claude-plugin-marketplace.git
-
-# Copy the /plugin command to your global Claude commands
-mkdir -p ~/.claude/commands
-cp claude-plugin-marketplace/.claude/commands/plugin.md ~/.claude/commands/
+/plugin marketplace add Piscatore/claude-plugin-marketplace
 ```
 
-Or copy it to your project's `.claude/commands/` directory:
+This connects your Claude Code instance to the marketplace.
+
+### Browse and Install Plugins
 
 ```bash
-mkdir -p .claude/commands
-cp /path/to/claude-plugin-marketplace/.claude/commands/plugin.md .claude/commands/
+/plugin marketplace list                    # List all marketplaces
+/plugin list                                # List all available plugins
+/plugin install agent-plugins:doc-maintainer  # Install a plugin
 ```
-
-### Using the `/plugin` Command
-
-Once the command is installed, you can browse and install plugins from **any project**:
-
-```bash
-/plugin              # List all available plugins
-/plugin list         # List all available plugins
-/plugin search <query>   # Search for plugins
-/plugin show <id>    # Show detailed plugin information
-/plugin install <id> # Install a plugin to your project
-```
-
-The `/plugin` command automatically fetches the latest plugin information from GitHub, so you don't need to clone the repository to use it.
 
 ### Manual Installation
 
 1. Clone this repository
-2. Copy desired plugin files from `plugins/` to your project's `.claude/context/plugins/` directory
+2. Copy desired plugin directories from `plugins/` to your project's `.claude/context/plugins/` directory
 3. Restart Claude Code or reload context
 
 ## Available Plugins
@@ -71,31 +53,39 @@ Each plugin is a markdown specification file that defines:
 
 To add a new plugin to the marketplace:
 
-1. Create your plugin specification in `plugins/<plugin-id>.md`
-2. Add metadata to `plugins.json`:
+1. Create plugin directory structure:
+   ```
+   plugins/your-plugin-id/
+   ├── .claude-plugin/
+   │   ├── plugin.json
+   │   └── agents/
+   │       └── your-agent.md
+   ```
 
-```json
-{
-  "id": "your-plugin-id",
-  "name": "Your Plugin Name",
-  "version": "1.0.0",
-  "description": "Brief description of what your plugin does",
-  "author": "Your Name",
-  "tags": ["tag1", "tag2"],
-  "file": "plugins/your-plugin-id.md",
-  "category": "productivity",
-  "capabilities": [
-    "Capability 1",
-    "Capability 2"
-  ],
-  "useCases": [
-    "Use case 1",
-    "Use case 2"
-  ]
-}
-```
+2. Create `.claude-plugin/plugin.json`:
+   ```json
+   {
+     "name": "your-plugin-id",
+     "version": "1.0.0",
+     "description": "Brief description of your plugin",
+     "author": "Your Name",
+     "agents": ["./agents/"]
+   }
+   ```
 
-3. Update the README table (or use `/plugin list` to generate it)
+3. Add plugin to `.claude-plugin/marketplace.json`:
+   ```json
+   {
+     "name": "your-plugin-id",
+     "source": "./your-plugin-id",
+     "description": "Brief description",
+     "version": "1.0.0",
+     "author": "Your Name",
+     "keywords": ["tag1", "tag2"],
+     "strict": false
+   }
+   ```
+
 4. Submit a pull request
 
 ## Plugin Categories
@@ -129,12 +119,15 @@ Task(
 
 ```
 claude-plugin-marketplace/
-├── plugins/                    # Plugin specification files
-│   └── doc-maintainer.md
-├── .claude/
-│   └── commands/
-│       └── plugin.md          # /plugin command implementation
-├── plugins.json               # Plugin registry and metadata
+├── .claude-plugin/
+│   └── marketplace.json       # Marketplace registry (required)
+├── plugins/
+│   └── doc-maintainer/
+│       ├── .claude-plugin/
+│       │   ├── plugin.json    # Plugin metadata
+│       │   └── agents/
+│       │       └── doc-maintainer.md  # Agent specification
+│       └── doc-maintainer.md  # Legacy format (for reference)
 └── README.md                  # This file
 ```
 
