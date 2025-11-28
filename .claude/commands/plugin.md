@@ -11,15 +11,20 @@ Parse the user's command to determine the action:
 
 ## Plugin Registry
 
-The plugin registry is located at: `plugins.json`
+The plugin registry can be accessed in two ways:
 
-Read this file to get the list of available plugins and their metadata.
+1. **Local** (if in the marketplace repo): Read `plugins.json`
+2. **Remote** (from any project): Fetch from GitHub
+   - Registry URL: `https://raw.githubusercontent.com/Piscatore/claude-plugin-marketplace/main/plugins.json`
+   - Plugin files: `https://raw.githubusercontent.com/Piscatore/claude-plugin-marketplace/main/plugins/<filename>`
+
+**Always try the remote URL first** using the WebFetch tool. Only fall back to local file if WebFetch fails.
 
 ## Command Actions
 
 ### List Plugins (`/plugin list` or `/plugin`)
 
-1. Read `plugins.json`
+1. Fetch the plugin registry (remote first, then local fallback)
 2. Display a formatted table of all available plugins:
    ```
    Available Claude Plugins:
@@ -32,14 +37,14 @@ Read this file to get the list of available plugins and their metadata.
 
 ### Search Plugins (`/plugin search <query>`)
 
-1. Read `plugins.json`
+1. Fetch the plugin registry (remote first, then local fallback)
 2. Search through plugin name, description, tags, and capabilities
 3. Display matching plugins in the same table format
 4. If no matches: "No plugins found matching '<query>'"
 
 ### Show Plugin Details (`/plugin show <plugin-id>`)
 
-1. Read `plugins.json`
+1. Fetch the plugin registry (remote first, then local fallback)
 2. Find the plugin by ID
 3. Display detailed information:
    ```
@@ -69,9 +74,11 @@ Read this file to get the list of available plugins and their metadata.
 
 ### Install Plugin (`/plugin install <plugin-id>`)
 
-1. Read `plugins.json`
+1. Fetch the plugin registry (remote first, then local fallback)
 2. Find the plugin by ID
-3. Read the plugin file from the `file` path specified in the registry
+3. Fetch the plugin file:
+   - **Remote**: Use WebFetch with `https://raw.githubusercontent.com/Piscatore/claude-plugin-marketplace/main/plugins/<filename>`
+   - **Local fallback**: Read from the `file` path specified in the registry
 4. Determine installation location:
    - Check if `.claude/context/` directory exists in current working directory
    - If yes: Install to `.claude/context/plugins/<plugin-id>.md`
@@ -89,15 +96,16 @@ Read this file to get the list of available plugins and their metadata.
 
 ## Error Handling
 
-- If `plugins.json` is not found: "Plugin marketplace not initialized. Clone the repository first."
+- If registry fetch fails (both remote and local): "Unable to access plugin marketplace. Check your internet connection or ensure you're in the marketplace repository."
 - If no command or invalid command: Show help message with available commands
 - For all file operations, handle errors gracefully with clear messages
 
 ## Important Notes
 
-- Always read from `plugins.json` for the latest plugin information
-- The registry file path is relative to the current working directory
-- Plugin files are stored in the `plugins/` directory
+- **Always fetch from GitHub first** using WebFetch for the registry and plugin files
+- Only fall back to local files if WebFetch fails
+- Registry URL: `https://raw.githubusercontent.com/Piscatore/claude-plugin-marketplace/main/plugins.json`
+- Plugin URL pattern: `https://raw.githubusercontent.com/Piscatore/claude-plugin-marketplace/main/plugins/<filename>`
 - Installation creates the `.claude/context/plugins/` directory if needed
-- Use the Read and Write tools for file operations
+- Use WebFetch for remote access, Read/Write for local operations
 - Keep output concise and well-formatted using markdown tables
