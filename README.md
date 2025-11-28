@@ -8,9 +8,29 @@ Claude Plugins are specialized agent specifications that define focused behavior
 
 ## Quick Start
 
+### Setup (One-Time)
+
+To enable the `/plugin` command in any project, copy the command file to your home directory:
+
+```bash
+# Clone the marketplace
+git clone https://github.com/Piscatore/claude-plugin-marketplace.git
+
+# Copy the /plugin command to your global Claude commands
+mkdir -p ~/.claude/commands
+cp claude-plugin-marketplace/.claude/commands/plugin.md ~/.claude/commands/
+```
+
+Or copy it to your project's `.claude/commands/` directory:
+
+```bash
+mkdir -p .claude/commands
+cp /path/to/claude-plugin-marketplace/.claude/commands/plugin.md .claude/commands/
+```
+
 ### Using the `/plugin` Command
 
-This repository includes a built-in `/plugin` command for browsing and installing plugins:
+Once the command is installed, you can browse and install plugins from **any project**:
 
 ```bash
 /plugin              # List all available plugins
@@ -19,6 +39,8 @@ This repository includes a built-in `/plugin` command for browsing and installin
 /plugin show <id>    # Show detailed plugin information
 /plugin install <id> # Install a plugin to your project
 ```
+
+The `/plugin` command automatically fetches the latest plugin information from GitHub, so you don't need to clone the repository to use it.
 
 ### Manual Installation
 
