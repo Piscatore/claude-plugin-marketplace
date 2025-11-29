@@ -1,7 +1,7 @@
 {
-  "name": "agent-plugins",
+  "name": "piscatore-agent-plugins",
   "owner": {
-    "name": "AgentPlugins",
+    "name": "Piscatore",
     "email": "plugins@example.com"
   },
   "metadata": {
