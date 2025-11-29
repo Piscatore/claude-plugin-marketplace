@@ -6,13 +6,12 @@
   },
   "metadata": {
     "version": "1.0.0",
-    "description": "Curated collection of specialized agent plugins for Claude Code",
-    "pluginRoot": "./plugins"
+    "description": "Curated collection of specialized agent plugins for Claude Code"
   },
   "plugins": [
     {
       "name": "doc-maintainer",
-      "source": "./doc-maintainer",
+      "source": "doc-maintainer",
       "description": "Specialized agent for documentation auditing and maintenance. Supports audit mode (read-only + report file) and active maintenance modes.",
       "version": "1.2.0",
       "author": {

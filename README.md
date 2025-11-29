@@ -21,7 +21,7 @@ This connects your Claude Code instance to the marketplace.
 ```bash
 /plugin marketplace list                    # List all marketplaces
 /plugin list                                # List all available plugins
-/plugin install agent-plugins:doc-maintainer  # Install a plugin
+/plugin install piscatore-agent-plugins:doc-maintainer  # Install a plugin
 ```
 
 ### Manual Installation
@@ -55,14 +55,13 @@ To add a new plugin to the marketplace:
 
 1. Create plugin directory structure:
    ```
-   plugins/your-plugin-id/
-   ├── .claude-plugin/
-   │   ├── plugin.json
-   │   └── agents/
-   │       └── your-agent.md
+   your-plugin-id/
+   ├── plugin.json
+   └── agents/
+       └── your-agent.md
    ```
 
-2. Create `.claude-plugin/plugin.json`:
+2. Create `plugin.json`:
    ```json
    {
      "name": "your-plugin-id",
@@ -77,16 +76,16 @@ To add a new plugin to the marketplace:
    ```json
    {
      "name": "your-plugin-id",
-     "source": "./your-plugin-id",
+     "source": "your-plugin-id",
      "description": "Brief description",
      "version": "1.0.0",
-     "author": "Your Name",
+     "author": { "name": "Your Name", "email": "you@example.com" },
      "keywords": ["tag1", "tag2"],
      "strict": false
    }
    ```
 
-4. Submit a pull request
+4. Commit and push
 
 ## Plugin Categories
 
@@ -121,12 +120,10 @@ Task(
 claude-plugin-marketplace/
 ├── .claude-plugin/
 │   └── marketplace.json       # Marketplace registry (required)
-├── plugins/
-│   └── doc-maintainer/
-│       └── .claude-plugin/
-│           ├── plugin.json    # Plugin metadata
-│           └── agents/
-│               └── doc-maintainer.md  # Agent specification (EDIT HERE)
+├── doc-maintainer/
+│   ├── plugin.json            # Plugin metadata
+│   └── agents/
+│       └── doc-maintainer.md  # Agent specification (EDIT HERE)
 └── README.md
 ```
 
@@ -134,8 +131,8 @@ claude-plugin-marketplace/
 
 When modifying a plugin:
 
-1. **Edit** the agent spec: `plugins/<plugin-id>/.claude-plugin/agents/<plugin-id>.md`
-2. **Update version** in `plugins/<plugin-id>/.claude-plugin/plugin.json`
+1. **Edit** the agent spec: `<plugin-id>/agents/<plugin-id>.md`
+2. **Update version** in `<plugin-id>/plugin.json`
 3. **Update version** in `.claude-plugin/marketplace.json`
 4. **Commit and push** to GitHub
 5. **Update locally**: `/plugin update` or reinstall the plugin
