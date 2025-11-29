@@ -123,19 +123,24 @@ claude-plugin-marketplace/
 │   └── marketplace.json       # Marketplace registry (required)
 ├── plugins/
 │   └── doc-maintainer/
-│       ├── .claude-plugin/
-│       │   ├── plugin.json    # Plugin metadata
-│       │   └── agents/
-│       │       └── doc-maintainer.md  # Agent specification
-│       └── doc-maintainer.md  # Legacy format (for reference)
-└── README.md                  # This file
+│       └── .claude-plugin/
+│           ├── plugin.json    # Plugin metadata
+│           └── agents/
+│               └── doc-maintainer.md  # Agent specification (EDIT HERE)
+└── README.md
 ```
+
+## Plugin Development Workflow
+
+When modifying a plugin:
+
+1. **Edit** the agent spec: `plugins/<plugin-id>/.claude-plugin/agents/<plugin-id>.md`
+2. **Update version** in `plugins/<plugin-id>/.claude-plugin/plugin.json`
+3. **Update version** in `.claude-plugin/marketplace.json`
+4. **Commit and push** to GitHub
+5. **Update locally**: `/plugin update` or reinstall the plugin
 
 ## Version
 
 Marketplace Version: 1.0.0
 Last Updated: 2025-11-28
-
-## License
-
-[Your chosen license]
