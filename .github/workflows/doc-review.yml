@@ -4,6 +4,9 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+env:
+  CLAUDE_MODEL: claude-sonnet-4-20250514  # Can be overridden in repository variables
+
 jobs:
   doc-review:
     runs-on: ubuntu-latest
@@ -56,7 +59,7 @@ jobs:
           # Create the prompt
           cat > prompt.json << 'PROMPT_END'
           {
-            "model": "claude-sonnet-4-20250514",
+            "model": "MODEL_PLACEHOLDER",
             "max_tokens": 4096,
             "messages": [
               {
@@ -71,6 +74,7 @@ jobs:
           echo "$PRINCIPLES" > principles_temp.txt
           echo "$FILES" > files_temp.txt
           echo "$DIFF" > diff_temp.txt
+          echo "$CLAUDE_MODEL" > model_temp.txt
 
           python3 << 'PYTHON_END'
           import json
@@ -87,6 +91,10 @@ jobs:
           with open('diff_temp.txt', 'r') as f:
               diff = f.read()
 
+          with open('model_temp.txt', 'r') as f:
+              model = f.read().strip()
+
+          data['model'] = model
           content = data['messages'][0]['content']
           content = content.replace('PRINCIPLES_PLACEHOLDER', principles[:30000])
           content = content.replace('FILES_PLACEHOLDER', files)
