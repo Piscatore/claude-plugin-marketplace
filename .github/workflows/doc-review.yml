@@ -1,0 +1,157 @@
+name: Documentation Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  doc-review:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get PR diff
+        id: diff
+        run: |
+          # Get the diff between base and head
+          git diff origin/${{ github.base_ref }}...origin/${{ github.head_ref }} > pr_diff.txt
+
+          # Get list of changed files
+          git diff --name-only origin/${{ github.base_ref }}...origin/${{ github.head_ref }} > changed_files.txt
+
+          echo "Files changed:"
+          cat changed_files.txt
+
+      - name: Read shared principles
+        id: principles
+        run: |
+          if [ -f "shared/documentation-principles.md" ]; then
+            echo "principles_exist=true" >> $GITHUB_OUTPUT
+          else
+            echo "principles_exist=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run doc-pr-reviewer via Claude API
+        id: review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          # Read the diff and files
+          DIFF=$(cat pr_diff.txt | head -c 50000)  # Limit to 50KB
+          FILES=$(cat changed_files.txt)
+
+          # Read principles if they exist
+          PRINCIPLES=""
+          if [ -f "shared/documentation-principles.md" ]; then
+            PRINCIPLES=$(cat shared/documentation-principles.md | head -c 30000)
+          fi
+
+          # Create the prompt
+          cat > prompt.json << 'PROMPT_END'
+          {
+            "model": "claude-sonnet-4-20250514",
+            "max_tokens": 4096,
+            "messages": [
+              {
+                "role": "user",
+                "content": "You are doc-pr-reviewer, a documentation compliance reviewer.\n\nReview this PR for documentation compliance.\n\n## Documentation Principles\n\nPRINCIPLES_PLACEHOLDER\n\n## Changed Files\n\nFILES_PLACEHOLDER\n\n## Diff\n\n```diff\nDIFF_PLACEHOLDER\n```\n\n## Instructions\n\nApply the compliance checklist:\n- [ ] No existing docs duplicated (DRY principle)\n- [ ] Existing docs updated rather than new ones created\n- [ ] All affected references, TOCs, and indexes updated\n- [ ] No broken links introduced\n- [ ] Temporal documents only appended to (not modified)\n- [ ] Consistent terminology and formatting\n- [ ] No contradictions with existing documentation\n\nProvide a review in this format:\n\n## Documentation Review\n\n### Summary\n- ✅ X checks passed\n- ⚠️ X warnings\n- ❌ X issues\n\n### Issues (if any)\n[List critical issues that should block merge]\n\n### Warnings (if any)\n[List non-blocking concerns]\n\n### Passed\n[List what passed]\n\n---\n*Reviewed by doc-pr-reviewer (automated)*"
+              }
+            ]
+          }
+          PROMPT_END
+
+          # Replace placeholders (using temp files to handle special chars)
+          echo "$PRINCIPLES" > principles_temp.txt
+          echo "$FILES" > files_temp.txt
+          echo "$DIFF" > diff_temp.txt
+
+          python3 << 'PYTHON_END'
+          import json
+
+          with open('prompt.json', 'r') as f:
+              data = json.load(f)
+
+          with open('principles_temp.txt', 'r') as f:
+              principles = f.read()
+
+          with open('files_temp.txt', 'r') as f:
+              files = f.read()
+
+          with open('diff_temp.txt', 'r') as f:
+              diff = f.read()
+
+          content = data['messages'][0]['content']
+          content = content.replace('PRINCIPLES_PLACEHOLDER', principles[:30000])
+          content = content.replace('FILES_PLACEHOLDER', files)
+          content = content.replace('DIFF_PLACEHOLDER', diff[:50000])
+          data['messages'][0]['content'] = content
+
+          with open('prompt.json', 'w') as f:
+              json.dump(data, f)
+          PYTHON_END
+
+          # Call Claude API
+          RESPONSE=$(curl -s https://api.anthropic.com/v1/messages \
+            -H "Content-Type: application/json" \
+            -H "x-api-key: $ANTHROPIC_API_KEY" \
+            -H "anthropic-version: 2023-06-01" \
+            -d @prompt.json)
+
+          # Extract the text response
+          REVIEW=$(echo "$RESPONSE" | python3 -c "import sys, json; data = json.load(sys.stdin); print(data.get('content', [{}])[0].get('text', 'Error: Could not get review'))")
+
+          # Save for next step
+          echo "$REVIEW" > review.md
+
+          # Check if review contains issues
+          if echo "$REVIEW" | grep -q "❌"; then
+            echo "has_issues=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_issues=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Post review comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const review = fs.readFileSync('review.md', 'utf8');
+
+            // Find existing bot comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' &&
+              c.body.includes('Reviewed by doc-pr-reviewer')
+            );
+
+            const body = review + '\n\n---\n*Commit: ${{ github.event.pull_request.head.sha }}*';
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
