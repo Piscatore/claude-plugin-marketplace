@@ -5,7 +5,7 @@
     "email": "plugins@example.com"
   },
   "metadata": {
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Curated collection of specialized agent plugins for Claude Code"
   },
   "plugins": [
@@ -13,12 +13,24 @@
       "name": "doc-maintainer",
       "source": "./doc-maintainer",
       "description": "Specialized agent for documentation auditing and maintenance. Supports audit mode (read-only + report file) and active maintenance modes. Manages CLAUDE.md governance section.",
-      "version": "1.3.1",
+      "version": "1.4.0",
       "author": {
         "name": "AgentPlugins",
         "email": "plugins@example.com"
       },
-      "keywords": ["documentation", "maintenance", "indexing", "consistency", "audit"],
+      "keywords": ["documentation", "maintenance", "indexing", "consistency", "audit", "governance"],
+      "strict": false
+    },
+    {
+      "name": "doc-pr-reviewer",
+      "source": "./doc-pr-reviewer",
+      "description": "Reviews Pull Requests for documentation compliance. Supports advisory, strict, and auto-fix modes. Companion to doc-maintainer.",
+      "version": "1.0.0",
+      "author": {
+        "name": "AgentPlugins",
+        "email": "plugins@example.com"
+      },
+      "keywords": ["documentation", "pr-review", "compliance", "enforcement", "github"],
       "strict": false
     }
   ]
