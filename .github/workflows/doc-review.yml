@@ -175,10 +175,26 @@ jobs:
             }
 
             // Submit new review
-            await github.rest.pulls.createReview({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number,
-              body: body,
-              event: event
-            });
+            try {
+              await github.rest.pulls.createReview({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+                body: body,
+                event: event
+              });
+            } catch (err) {
+              // If APPROVE fails (not permitted), fall back to COMMENT
+              if (event === 'APPROVE' && err.message.includes('not permitted to approve')) {
+                console.log('APPROVE not permitted, falling back to COMMENT');
+                await github.rest.pulls.createReview({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: context.issue.number,
+                  body: body + '\n\n*Note: Approval requires repo settings change*',
+                  event: 'COMMENT'
+                });
+              } else {
+                throw err;
+              }
+            }
