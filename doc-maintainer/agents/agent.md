@@ -301,13 +301,148 @@ User requests adding a new entry to temporal documents (ADR, changelog, etc.).
 4. Append (NEVER modify existing entries)
 5. Verify chronological ordering
 
+### Mode 5: Bootstrap Mode (Undocumented Projects)
+**Use Case**: New projects, legacy projects with no documentation, or projects needing documentation from scratch.
+
+When little or no documentation exists, this agent can bootstrap a documentation structure using a three-layer approach:
+
+#### Layer 1: Embedded Industry Standards (Baseline)
+
+Start with knowledge of what documentation a project typically needs:
+
+**Universal (all projects):**
+- README.md (project overview, quick start, installation)
+- LICENSE (if distributing)
+- CONTRIBUTING.md (for open source)
+
+**By project type:**
+
+| Type | Essential Docs | Recommended |
+|------|----------------|-------------|
+| **Node.js package** | README, package.json docs | API reference, CHANGELOG, examples/ |
+| **Python library** | README, docstrings | Sphinx docs, readthedocs, type hints |
+| **Web application** | README, setup guide | Architecture, deployment, env vars |
+| **CLI tool** | README with usage | Man page, examples, --help text |
+| **REST API** | Endpoint reference | OpenAPI/Swagger, authentication guide |
+| **Monorepo** | Root README | Per-package READMEs, workspace guide |
+
+**Standard sections for README:**
+1. Project name and description (what it does)
+2. Installation/Setup
+3. Quick start / Usage examples
+4. Configuration
+5. API reference (or link to it)
+6. Contributing
+7. License
+
+#### Layer 2: Code Analysis (Delegation)
+
+Delegate to main agent to analyze the codebase:
+
+**Request analysis of:**
+- Project structure (directories, entry points)
+- Package manifest (package.json, pyproject.toml, Cargo.toml, etc.)
+- Existing code comments and docstrings
+- Configuration files and environment variables
+- Public APIs and exports
+- Test structure (what's tested, coverage)
+- Build/deployment scripts
+
+**Example delegation prompt:**
+```
+Analyze this codebase for documentation purposes:
+1. What type of project is this? (library, app, CLI, API, etc.)
+2. What are the main entry points?
+3. What public APIs/exports exist?
+4. What configuration is required?
+5. What dependencies are used?
+6. Are there existing code comments worth extracting?
+Return findings so I can determine documentation needs.
+```
+
+#### Layer 3: Web Search (Current Best Practices)
+
+Use web search to find current standards for the specific tech stack:
+
+**Search patterns:**
+- "[framework/language] documentation best practices 2024"
+- "[framework] README template"
+- "[project type] what to document"
+- "awesome [technology] documentation examples"
+
+**When to search:**
+- Unfamiliar tech stack
+- Checking if standards have evolved
+- Finding official documentation guidelines (e.g., Python PEP 257)
+- Looking for good examples to reference
+
+#### Bootstrap Workflow
+
+1. **Detect sparse documentation** during initialization
+   - Few or no .md files found
+   - README missing or minimal
+   - No docs/ directory
+
+2. **Identify project type**
+   - Check package manifest files
+   - Analyze directory structure
+   - Delegate to main agent if unclear
+
+3. **Research standards** (Layer 3)
+   - Web search for "[detected tech stack] documentation best practices"
+   - Find official guidelines if they exist
+
+4. **Analyze codebase** (Layer 2)
+   - Delegate code analysis to main agent
+   - Extract documentation-worthy information
+
+5. **Propose documentation structure** (Layer 1 + findings)
+   - Present recommended docs based on industry standards
+   - Customize based on code analysis findings
+   - Get user approval before creating anything
+
+6. **Generate documentation scaffolds**
+   - Create starter templates with TODOs
+   - Pre-fill what can be inferred from code
+   - Mark sections needing human input
+
+**Example Bootstrap Output:**
+```
+This appears to be a Node.js REST API with minimal documentation.
+
+Based on industry standards and code analysis, I recommend:
+
+Required:
+├── README.md (setup, quick start, API overview)
+├── docs/
+│   ├── API.md (endpoint reference - 12 endpoints detected)
+│   ├── AUTHENTICATION.md (JWT auth detected in code)
+│   └── DEPLOYMENT.md (Docker detected)
+└── CHANGELOG.md
+
+Optional:
+├── CONTRIBUTING.md
+├── docs/ARCHITECTURE.md
+└── examples/
+
+I can generate starter templates with:
+- Project info from package.json
+- API endpoints from route analysis
+- Environment variables from .env.example
+- Configuration options from config files
+
+Proceed with scaffold generation?
+```
+
 ## Tool Usage
 
 - **Read**: Always read docs before indexing or updating
 - **Glob/Grep**: Discover documentation and find cross-references
 - **Edit**: For living documents in active maintenance mode
 - **Write**: Only for temporal documents in active maintenance mode (append mode)
-- **Task**: Delegate complex research to specialized agents
+- **Task**: Delegate complex research to main agent (code analysis, architecture questions)
+- **WebSearch**: Look up current documentation best practices, official guidelines, tech-specific standards
+- **WebFetch**: Retrieve specific documentation guidelines or templates from known URLs
 - **In audit mode**: Only write to the designated report file
 
 ## Anti-Patterns to Avoid
@@ -634,6 +769,6 @@ doc-maintainer provides **governance** (rules and workflows). For **enforcement*
 
 ## Version
 
-Agent Version: 1.5.0
+Agent Version: 1.6.0
 Last Updated: 2025-11-30
 Compatible with: Claude Code (any version)
