@@ -1,5 +1,36 @@
 # Claude Code Instructions for claude-plugin-marketplace
 
+## Development Workflow (PR-Based)
+
+**Do NOT push directly to main.** Use feature branches and PRs:
+
+1. Create a feature branch: `git checkout -b feature/description`
+2. Make changes and commit
+3. Push branch: `git push -u origin feature/description`
+4. Create PR: `gh pr create`
+5. Run doc-pr-reviewer: `"Review this PR for documentation compliance"`
+6. Address any issues
+7. Merge PR
+
+### Using doc-pr-reviewer on this repo
+
+After creating a PR, invoke the reviewer:
+```
+Review PR #[number] using doc-pr-reviewer
+```
+
+Or for the current branch's PR:
+```
+Review the open PR for this branch using doc-pr-reviewer
+```
+
+### Branch Naming
+
+- `feature/` - New features
+- `fix/` - Bug fixes
+- `docs/` - Documentation updates
+- `refactor/` - Code refactoring
+
 ## Project Overview
 
 This repository contains Claude Code plugins for documentation governance:

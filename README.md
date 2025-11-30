@@ -132,11 +132,16 @@ claude-plugin-marketplace/
 
 When modifying a plugin:
 
-1. **Edit** the agent spec: `<plugin-id>/agents/<plugin-id>.md`
-2. **Update version** in `<plugin-id>/plugin.json`
-3. **Update version** in `.claude-plugin/marketplace.json`
-4. **Commit and push** to GitHub
-5. **Update locally**: `/plugin update` or reinstall the plugin
+1. **Create branch**: `git checkout -b feature/description`
+2. **Edit** the agent spec: `<plugin-id>/agents/<plugin-id>.md`
+3. **Update version** in `<plugin-id>/plugin.json`
+4. **Commit and push branch**: `git push -u origin feature/description`
+5. **Create PR**: `gh pr create`
+6. **Review**: Run doc-pr-reviewer on the PR
+7. **Merge** after review passes
+8. **Update locally**: `/plugin update` or reinstall the plugin
+
+See `CLAUDE.md` for detailed workflow and branch naming conventions.
 
 ## Version
 
