@@ -23,11 +23,11 @@ jobs:
       - name: Get PR diff
         id: diff
         run: |
-          # Get the diff between base and head
-          git diff origin/${{ github.base_ref }}...origin/${{ github.head_ref }} > pr_diff.txt
+          # Get the diff between base and head (quoted to prevent injection)
+          git diff "origin/${{ github.base_ref }}"..."origin/${{ github.head_ref }}" > pr_diff.txt
 
           # Get list of changed files
-          git diff --name-only origin/${{ github.base_ref }}...origin/${{ github.head_ref }} > changed_files.txt
+          git diff --name-only "origin/${{ github.base_ref }}"..."origin/${{ github.head_ref }}" > changed_files.txt
 
           echo "Files changed:"
           cat changed_files.txt
@@ -85,12 +85,20 @@ jobs:
               json.dump(data, f)
           PYTHON_END
 
-          # Call Claude API
-          RESPONSE=$(curl -s https://api.anthropic.com/v1/messages \
+          # Call Claude API with timeout
+          RESPONSE=$(curl -s --max-time 120 https://api.anthropic.com/v1/messages \
             -H "Content-Type: application/json" \
             -H "x-api-key: $ANTHROPIC_API_KEY" \
             -H "anthropic-version: 2023-06-01" \
             -d @prompt.json)
+
+          # Check for API errors
+          if echo "$RESPONSE" | grep -q '"error"'; then
+            echo "API Error: $RESPONSE"
+            echo "## Code Review\n\n❌ **API Error**: Could not complete review. Please check API key and try again.\n\n---\n*Reviewed by claude-code-reviewer (automated)*" > review.md
+            echo "has_critical=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
 
           # Extract the text response
           REVIEW=$(echo "$RESPONSE" | python3 -c "import sys, json; data = json.load(sys.stdin); print(data.get('content', [{}])[0].get('text', 'Error: Could not get review'))")

@@ -23,11 +23,11 @@ jobs:
       - name: Get PR diff
         id: diff
         run: |
-          # Get the diff between base and head
-          git diff origin/${{ github.base_ref }}...origin/${{ github.head_ref }} > pr_diff.txt
+          # Get the diff between base and head (quoted to prevent injection)
+          git diff "origin/${{ github.base_ref }}"..."origin/${{ github.head_ref }}" > pr_diff.txt
 
           # Get list of changed files
-          git diff --name-only origin/${{ github.base_ref }}...origin/${{ github.head_ref }} > changed_files.txt
+          git diff --name-only "origin/${{ github.base_ref }}"..."origin/${{ github.head_ref }}" > changed_files.txt
 
           echo "Files changed:"
           cat changed_files.txt
@@ -105,12 +105,20 @@ jobs:
               json.dump(data, f)
           PYTHON_END
 
-          # Call Claude API
-          RESPONSE=$(curl -s https://api.anthropic.com/v1/messages \
+          # Call Claude API with timeout
+          RESPONSE=$(curl -s --max-time 120 https://api.anthropic.com/v1/messages \
             -H "Content-Type: application/json" \
             -H "x-api-key: $ANTHROPIC_API_KEY" \
             -H "anthropic-version: 2023-06-01" \
             -d @prompt.json)
+
+          # Check for API errors
+          if echo "$RESPONSE" | grep -q '"error"'; then
+            echo "API Error: $RESPONSE"
+            echo "## Documentation Review\n\n❌ **API Error**: Could not complete review. Please check API key and try again.\n\n---\n*Reviewed by doc-pr-reviewer (automated)*" > review.md
+            echo "has_issues=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
 
           # Extract the text response
           REVIEW=$(echo "$RESPONSE" | python3 -c "import sys, json; data = json.load(sys.stdin); print(data.get('content', [{}])[0].get('text', 'Error: Could not get review'))")
@@ -118,8 +126,9 @@ jobs:
           # Save for next step
           echo "$REVIEW" > review.md
 
-          # Check if review contains issues
-          if echo "$REVIEW" | grep -q "❌"; then
+          # Check if review contains actual issues (not just "❌ 0 issues")
+          # Look for "❌" followed by a non-zero number
+          if echo "$REVIEW" | grep -qE "❌ [1-9]"; then
             echo "has_issues=true" >> $GITHUB_OUTPUT
           else
             echo "has_issues=false" >> $GITHUB_OUTPUT
@@ -134,12 +143,10 @@ jobs:
             const hasIssues = '${{ steps.review.outputs.has_issues }}' === 'true';
 
             // Determine review event based on findings
-            // APPROVE = no issues, REQUEST_CHANGES = has issues, COMMENT = warnings only
-            let event = 'COMMENT';
-            if (review.includes('❌')) {
+            // Use the has_issues output from previous step (checks for actual issue content)
+            let event = 'APPROVE';
+            if (hasIssues) {
               event = 'REQUEST_CHANGES';
-            } else if (!review.includes('⚠️') || review.includes('✅')) {
-              event = 'APPROVE';
             }
 
             const body = review + '\n\n---\n*Commit: ${{ github.event.pull_request.head.sha }}*';
