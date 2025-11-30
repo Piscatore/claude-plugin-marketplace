@@ -1,7 +1,7 @@
 {
   "name": "doc-pr-reviewer",
-  "version": "1.0.0",
-  "description": "Reviews Pull Requests for documentation compliance. Supports advisory, strict, and auto-fix modes. Companion to doc-maintainer.",
+  "version": "1.1.0",
+  "description": "Reviews Pull Requests for documentation compliance. Supports advisory, strict, and auto-fix modes with knowledge acquisition and web search for standards.",
   "author": {
     "name": "AgentPlugins"
   },

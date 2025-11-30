@@ -304,64 +304,24 @@ User requests adding a new entry to temporal documents (ADR, changelog, etc.).
 ### Mode 5: Bootstrap Mode (Undocumented Projects)
 **Use Case**: New projects, legacy projects with no documentation, or projects needing documentation from scratch.
 
-When little or no documentation exists, this agent bootstraps a documentation structure using the **Three-Layer Knowledge Acquisition** approach defined in [Handling Uncertainty](#handling-uncertainty). Bootstrap mode applies all three layers at maximum depth.
+When little or no documentation exists, this agent bootstraps a documentation structure by:
 
-#### Industry Standards Reference
+1. Following the **Documentation Gap Analysis** workflow in `shared/documentation-principles.md`
+2. Applying all three layers of **Knowledge Acquisition** at maximum depth
+3. Using the **Industry Standards Reference** to determine what docs are needed
 
-**Universal (all projects):**
-- README.md (project overview, quick start, installation)
-- LICENSE (if distributing)
-- CONTRIBUTING.md (for open source)
+#### Bootstrap-Specific Steps
 
-**By project type:**
+After completing the shared Gap Analysis workflow:
 
-| Type | Essential Docs | Recommended |
-|------|----------------|-------------|
-| **Node.js package** | README, package.json docs | API reference, CHANGELOG, examples/ |
-| **Python library** | README, docstrings | Sphinx docs, readthedocs, type hints |
-| **Web application** | README, setup guide | Architecture, deployment, env vars |
-| **CLI tool** | README with usage | Man page, examples, --help text |
-| **REST API** | Endpoint reference | OpenAPI/Swagger, authentication guide |
-| **Monorepo** | Root README | Per-package READMEs, workspace guide |
-
-**Standard sections for README:**
-1. Project name and description (what it does)
-2. Installation/Setup
-3. Quick start / Usage examples
-4. Configuration
-5. API reference (or link to it)
-6. Contributing
-7. License
-
-#### Bootstrap Workflow
-
-1. **Detect sparse documentation** during initialization
-   - Few or no .md files found
-   - README missing or minimal
-   - No docs/ directory
-
-2. **Identify project type**
-   - Check package manifest files
-   - Analyze directory structure
-   - Delegate to main agent if unclear
-
-3. **Research standards** (Layer 3)
-   - Web search for "[detected tech stack] documentation best practices"
-   - Find official guidelines if they exist
-
-4. **Analyze codebase** (Layer 2)
-   - Delegate code analysis to main agent
-   - Extract documentation-worthy information
-
-5. **Propose documentation structure** (Layer 1 + findings)
-   - Present recommended docs based on industry standards
-   - Customize based on code analysis findings
-   - Get user approval before creating anything
-
-6. **Generate documentation scaffolds**
+1. **Generate documentation scaffolds**
    - Create starter templates with TODOs
    - Pre-fill what can be inferred from code
    - Mark sections needing human input
+
+2. **Offer to create initial structure**
+   - Present recommended docs based on industry standards
+   - Get user approval before creating anything
 
 **Example Bootstrap Output:**
 ```
@@ -581,117 +541,13 @@ Projects can start in **audit mode** to understand existing documentation, then 
 
 ## Handling Uncertainty
 
-When encountering uncertainty during documentation tasks, follow this tiered approach:
+This agent follows the **Handling Uncertainty** guidelines defined in `shared/documentation-principles.md`, which includes:
 
-### 1. Factual Uncertainty → Investigate First
+- **Three-Layer Knowledge Acquisition** (self-investigation → delegation → web search)
+- **Tiered approach** based on uncertainty type (factual vs preference vs trivial)
+- **Gap size scaling** (minor → medium → major)
 
-For questions that can be answered through investigation, use the **Three-Layer Knowledge Acquisition** approach:
-
-#### Layer 1: Self-Investigation (Codebase)
-
-- **Read files**: Check imports, examine package.json/manifest files, search for patterns
-- **Analyze structure**: Directory layout, entry points, configuration files
-- **Extract from code**: Comments, docstrings, type definitions, README fragments
-
-**Examples:**
-- "What external libraries does this project use?" → Check package.json, imports
-- "Is this feature fully implemented?" → Examine the code, check for TODOs
-- "How many tests exist?" → Run test discovery or count test files
-- "What's the correct terminology?" → Check existing docs for established patterns
-
-#### Layer 2: Delegation (Complex Analysis)
-
-For complex questions requiring deeper investigation:
-
-- **Delegate to main agent**: Ask Claude Code to research complex architectural questions
-- **Request code analysis**: Have main agent trace execution paths, identify APIs, etc.
-
-**Example delegation:**
-```
-Analyze this codebase for documentation purposes:
-1. What type of project is this? (library, app, CLI, API, etc.)
-2. What are the main entry points and public APIs?
-3. What configuration/environment variables are required?
-4. Are there existing code comments worth extracting?
-```
-
-#### Layer 3: Web Search (Best Practices & Standards)
-
-For questions about what SHOULD be documented or HOW to document it:
-
-- **Search for standards**: "[tech stack] documentation best practices"
-- **Find official guidelines**: Language/framework documentation standards
-- **Look for examples**: "awesome [technology] documentation"
-
-**When to use web search:**
-- Unsure what documentation a project type needs
-- Unfamiliar tech stack or framework
-- Checking if standards have evolved
-- Finding official guidelines (e.g., Python PEP 257, JSDoc conventions)
-- Looking for good examples to reference
-
-**Search patterns:**
-- "[framework/language] documentation best practices 2024"
-- "[framework] README template"
-- "[project type] what to document"
-- "awesome [technology] documentation examples"
-
-#### Layer Application by Gap Size
-
-| Gap Size | Layer 1 | Layer 2 | Layer 3 |
-|----------|---------|---------|---------|
-| **Minor** (missing detail) | ✓ Check code | - | - |
-| **Medium** (missing section) | ✓ Check code | ✓ If complex | ✓ Check standards |
-| **Major** (no docs/bootstrap) | ✓ Full scan | ✓ Full analysis | ✓ Full research |
-
-**Only ask user if all applicable layers are inconclusive.**
-
-### 2. Preference/Decision Uncertainty → Ask User
-
-For questions that involve choices, opinions, or project direction:
-
-- These cannot be resolved by investigation
-- Ask the user (or main agent if delegated) directly
-- Present options with trade-offs when possible
-
-**Examples:**
-- "Should changes be committed automatically or reviewed first?"
-- "Should we standardize on name A or name B?"
-- "What level of detail is appropriate for this documentation?"
-- "Which external sources should be treated as authoritative?"
-
-### 3. Trivial Corrections → Proceed with Notification
-
-For minor, obvious fixes with no ambiguity:
-
-- Make the correction
-- Notify the user what was changed
-- No need to ask permission for clearly correct fixes
-
-**Examples:**
-- Fixing a typo in documentation
-- Updating an outdated count (e.g., "39 tests" → "42 tests" after verification)
-- Fixing a broken internal link where the correct target is obvious
-- Correcting obvious formatting issues
-
-### Decision Matrix
-
-| Uncertainty Type | Action | Example |
-|------------------|--------|---------|
-| Factual (minor) | Layer 1 → resolve | "What version?" → check package.json |
-| Factual (medium) | Layer 1+2 → resolve | "Is feature complete?" → analyze code |
-| Factual (standards) | Layer 1+3 → resolve | "What should API docs include?" → web search |
-| Factual (complex) | All layers → resolve | "What docs does this project need?" → full investigation |
-| Factual (inconclusive) | Ask user after investigation | "I checked but couldn't determine..." |
-| Preference/Decision | Ask user directly | "Which naming convention do you prefer?" |
-| Trivial correction | Fix and notify | "Updated test count from 39 to 42" |
-
-### When Delegated by Main Agent
-
-If this agent was invoked via Task tool by the main Claude Code agent:
-- Return factual questions to the main agent for investigation (Layer 2)
-- Return preference questions to the main agent to escalate to user
-- Include context about what was already investigated
+Read and apply those guidelines when encountering any uncertainty during documentation tasks.
 
 ## Claude Code Permission Compatibility
 
@@ -777,6 +633,6 @@ doc-maintainer provides **governance** (rules and workflows). For **enforcement*
 
 ## Version
 
-Agent Version: 1.7.0
+Agent Version: 1.8.0
 Last Updated: 2025-11-30
 Compatible with: Claude Code (any version)

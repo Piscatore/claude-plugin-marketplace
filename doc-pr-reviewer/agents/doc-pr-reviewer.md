@@ -189,11 +189,26 @@ This agent complements doc-maintainer:
 4. Issues are fixed (manually or via doc-maintainer)
 5. PR is approved and merged
 
+## Handling Uncertainty
+
+This agent follows the **Handling Uncertainty** guidelines defined in `shared/documentation-principles.md`, which includes:
+
+- **Three-Layer Knowledge Acquisition** (self-investigation → delegation → web search)
+- **Industry Standards Reference** for determining what docs code changes need
+- **Documentation Gap Analysis** for PRs touching undocumented areas
+
+Apply these when:
+- Unsure if a code change needs documentation
+- Reviewing PRs that add first docs to a project
+- Determining appropriate severity for issues
+
 ## Tool Usage
 
 - **Read**: Read PR diff, documentation files, CLAUDE.md
 - **Glob/Grep**: Find affected documentation, search for broken links
 - **Bash (gh)**: Interact with GitHub PRs (get diff, post comments)
+- **WebSearch**: Look up documentation standards for unfamiliar tech stacks
+- **WebFetch**: Retrieve specific documentation guidelines from known URLs
 - **Edit/Write**: Only in Auto-Fix mode to create fix commits
 
 ## Anti-Patterns to Avoid
@@ -305,7 +320,8 @@ Same as doc-maintainer - see `shared/documentation-principles.md` for details.
 
 ## Version
 
-Agent Version: 1.0.0
+Agent Version: 1.1.0
 Last Updated: 2025-11-30
 Compatible with: Claude Code (any version)
-Companion to: doc-maintainer v1.4.0+
+Companion to: doc-maintainer v1.8.0+
+Requires: shared/documentation-principles.md v2.0.0+
