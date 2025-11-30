@@ -636,3 +636,6 @@ doc-maintainer provides **governance** (rules and workflows). For **enforcement*
 Agent Version: 1.8.0
 Last Updated: 2025-11-30
 Compatible with: Claude Code (any version)
+Requires: shared/documentation-principles.md v2.0.0+
+
+**Note:** This agent depends on shared principles. See `CLAUDE.md` for versioning rules.

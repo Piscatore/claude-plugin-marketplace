@@ -357,6 +357,21 @@ Needs human input:
 
 ---
 
+## Maintenance & Versioning
+
+**See `CLAUDE.md` in the repository root for versioning rules.**
+
+This shared file is used by both `doc-maintainer` and `doc-pr-reviewer`. When this file is updated, both plugins must also be updated per the rules in CLAUDE.md.
+
+### Change Log
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 2.0.0 | 2025-11-30 | Added: Handling Uncertainty, Industry Standards, Gap Analysis |
+| 1.0.0 | 2025-11-30 | Initial: Core Principles, Document Classification, Compliance Checklist |
+
+---
+
 ## Version
 
 Principles Version: 2.0.0
