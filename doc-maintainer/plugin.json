@@ -5,5 +5,5 @@
   "author": {
     "name": "AgentPlugins"
   },
-  "agents": ["./agents/doc-maintainer.md"]
+  "agents": ["./agents/agent.md"]
 }
