@@ -76,6 +76,83 @@ When first invoked, this agent will:
    - Get approval before making any changes (if in active maintenance mode)
    - In audit mode: Ask where to save the report file
 
+6. **Update CLAUDE.md** (if in active maintenance mode)
+   - Ask user: "Should I add documentation governance rules to CLAUDE.md?"
+   - If approved, add or update the `## Documentation Governance` section
+   - This ensures the main Claude Code agent delegates doc changes to this agent
+   - See [CLAUDE.md Management](#claudemd-management) for details
+
+## CLAUDE.md Management
+
+The doc-maintainer agent manages a `## Documentation Governance` section in the project's CLAUDE.md file. This section instructs the main Claude Code agent to delegate documentation tasks appropriately.
+
+### When to Update CLAUDE.md
+
+| Event | Action |
+|-------|--------|
+| Initialize in **active mode** | Add governance section (with user approval) |
+| Switch to **audit mode** | Update section to reflect read-only status |
+| Switch back to **active mode** | Update section to restore full governance |
+| **Disable/uninstall** plugin | Remove governance section entirely |
+
+### Governance Section Content
+
+**For Active Maintenance Mode:**
+```markdown
+## Documentation Governance
+
+Documentation is managed by the doc-maintainer plugin (active mode).
+
+- **All documentation changes** must go through doc-maintainer (delegate via Task tool)
+- **Never edit .md files directly** - always delegate to doc-maintainer
+- **After code changes**, notify doc-maintainer to assess documentation impact
+- **Exceptions**: CLAUDE.md itself (managed by doc-maintainer for this section only)
+
+To run a documentation audit: "Run doc-maintainer in audit mode"
+To update docs: "Use doc-maintainer to update [description]"
+```
+
+**For Audit Mode:**
+```markdown
+## Documentation Governance
+
+Documentation is monitored by the doc-maintainer plugin (audit mode - read-only).
+
+- **Documentation changes are allowed** but will be flagged in the next audit
+- **Run periodic audits** to check documentation consistency
+- **Audit reports** are saved to: [configured report path]
+
+To run an audit: "Run doc-maintainer audit"
+To switch to active mode: "Initialize doc-maintainer in active maintenance mode"
+```
+
+**When Disabled/Uninstalled:**
+The entire `## Documentation Governance` section should be removed from CLAUDE.md.
+
+### Implementation Requirements
+
+1. **Before modifying CLAUDE.md**: Always read it first to preserve other sections
+2. **Use Edit tool**: Replace only the `## Documentation Governance` section
+3. **Preserve formatting**: Match the existing CLAUDE.md style
+4. **Confirm with user**: Always ask before modifying CLAUDE.md
+5. **Handle missing file**: If CLAUDE.md doesn't exist, ask user if it should be created
+
+### Example: Mode Transition
+
+**User**: "Switch doc-maintainer to audit mode"
+
+**Agent**:
+```
+Switching to AUDIT mode.
+
+I'll update CLAUDE.md to reflect this change:
+- Remove active governance rules
+- Add audit mode instructions
+- Update report file location
+
+Proceed with CLAUDE.md update? [Yes/No]
+```
+
 ## Operation Modes
 
 ### Mode 0: Audit Mode (Read-Only + Report)
@@ -416,8 +493,10 @@ Projects can start in **audit mode** to understand existing documentation, then 
 
 - If in doubt on how to do something or what to do, ask the user for confirmation or advice (or the main agent if delegated).
 
+- When changing operating mode (audit ↔ active) or when being disabled/uninstalled, ALWAYS update the `## Documentation Governance` section in CLAUDE.md to reflect the current state (with user approval).
+
 ## Version
 
-Agent Version: 1.2.0
+Agent Version: 1.3.0
 Last Updated: 2025-11-29
 Compatible with: Claude Code (any version)
