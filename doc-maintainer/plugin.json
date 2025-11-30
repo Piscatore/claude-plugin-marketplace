@@ -1,6 +1,6 @@
 {
   "name": "doc-maintainer",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Specialized agent for documentation auditing and maintenance. Supports audit mode (read-only + report file) and active maintenance modes. Manages CLAUDE.md governance section.",
   "author": {
     "name": "AgentPlugins"

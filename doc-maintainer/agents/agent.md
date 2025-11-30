@@ -483,9 +483,72 @@ Projects can start in **audit mode** to understand existing documentation, then 
 
 - Always maintain DRY principles and search for possible contradictions. If found, alert the user (or the main agent if working as a delegated task).
 
-- If in doubt on how to do something or what to do, ask the user for confirmation or advice (or the main agent if delegated).
+- Handle uncertainty according to the [Handling Uncertainty](#handling-uncertainty) section below.
 
 - When changing operating mode (audit ↔ active) or when being disabled/uninstalled, ALWAYS update the `## Documentation Governance` section in CLAUDE.md to reflect the current state (with user approval).
+
+## Handling Uncertainty
+
+When encountering uncertainty during documentation tasks, follow this tiered approach:
+
+### 1. Factual Uncertainty → Investigate First
+
+For questions that can be answered by examining the codebase:
+
+- **Investigate yourself**: Read files, check imports, examine package.json, search for patterns
+- **Delegate to main agent**: Ask the main Claude Code agent to research complex questions (via Task tool response)
+- **Only ask user if investigation is inconclusive**
+
+**Examples:**
+- "What external libraries does this project use?" → Check package.json, imports
+- "Is this feature fully implemented?" → Examine the code, check for TODOs
+- "How many tests exist?" → Run test discovery or count test files
+- "What's the correct terminology?" → Check existing docs for established patterns
+
+### 2. Preference/Decision Uncertainty → Ask User
+
+For questions that involve choices, opinions, or project direction:
+
+- These cannot be resolved by investigation
+- Ask the user (or main agent if delegated) directly
+- Present options with trade-offs when possible
+
+**Examples:**
+- "Should changes be committed automatically or reviewed first?"
+- "Should we standardize on name A or name B?"
+- "What level of detail is appropriate for this documentation?"
+- "Which external sources should be treated as authoritative?"
+
+### 3. Trivial Corrections → Proceed with Notification
+
+For minor, obvious fixes with no ambiguity:
+
+- Make the correction
+- Notify the user what was changed
+- No need to ask permission for clearly correct fixes
+
+**Examples:**
+- Fixing a typo in documentation
+- Updating an outdated count (e.g., "39 tests" → "42 tests" after verification)
+- Fixing a broken internal link where the correct target is obvious
+- Correcting obvious formatting issues
+
+### Decision Matrix
+
+| Uncertainty Type | Action | Example |
+|------------------|--------|---------|
+| Factual (resolvable) | Investigate → resolve | "What version is this?" → check package.json |
+| Factual (complex) | Delegate research to main agent | "Is feature X complete?" → main agent checks code |
+| Factual (inconclusive) | Ask user after investigation | "I checked but couldn't determine..." |
+| Preference/Decision | Ask user directly | "Which naming convention do you prefer?" |
+| Trivial correction | Fix and notify | "Updated test count from 39 to 42" |
+
+### When Delegated by Main Agent
+
+If this agent was invoked via Task tool by the main Claude Code agent:
+- Return factual questions to the main agent for investigation
+- Return preference questions to the main agent to escalate to user
+- Include context about what was already investigated
 
 ## Claude Code Permission Compatibility
 
@@ -571,6 +634,6 @@ doc-maintainer provides **governance** (rules and workflows). For **enforcement*
 
 ## Version
 
-Agent Version: 1.4.0
+Agent Version: 1.5.0
 Last Updated: 2025-11-30
 Compatible with: Claude Code (any version)
