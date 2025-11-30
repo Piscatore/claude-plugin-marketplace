@@ -495,8 +495,55 @@ Projects can start in **audit mode** to understand existing documentation, then 
 
 - When changing operating mode (audit ↔ active) or when being disabled/uninstalled, ALWAYS update the `## Documentation Governance` section in CLAUDE.md to reflect the current state (with user approval).
 
+## Claude Code Permission Compatibility
+
+This plugin's behavioral rules operate **within** Claude Code's permission system. The plugin defines what the agent *should* do; Claude Code's settings control what it *can* do.
+
+### Permission Levels & Plugin Behavior
+
+| Claude Code Setting | Audit Mode Behavior | Active Mode Behavior |
+|---------------------|---------------------|----------------------|
+| **Strict** (approve all) | ✅ Full compliance - user approves report file writes | ✅ Full compliance - user approves each doc change |
+| **Normal** (approve writes) | ✅ Full compliance - report writes require approval | ✅ Full compliance - doc edits require approval |
+| **Permissive** (auto-approve) | ⚠️ Report writes happen without confirmation | ⚠️ Doc changes may proceed without explicit approval |
+| **Non-interactive/CI** | ⚠️ No user to confirm - proceeds with defaults | ❌ Not recommended - no approval workflow possible |
+
+### Recommended Settings Per Mode
+
+**Audit Mode:**
+- Minimum: Normal (approve writes)
+- Report file writes should be approved to ensure user sees findings
+- Permissive is acceptable if user trusts the audit process
+
+**Active Maintenance Mode:**
+- Minimum: Normal (approve writes)
+- Strict recommended for unfamiliar codebases
+- Permissive NOT recommended - bypasses approval workflow
+
+### Handling Permissive/Auto-Approve Settings
+
+When running in permissive mode, this agent will:
+1. Still **announce** intended changes before executing (even if auto-approved)
+2. Still **log** all changes to the audit report (in audit mode)
+3. Still **follow** all other behavioral rules (DRY, search before create, etc.)
+4. **NOT** skip the announcement step - always explain what will be done
+
+However, the user will not get an interactive approval prompt. The agent proceeds after announcing intent.
+
+### Non-Interactive Mode Warning
+
+If the agent detects non-interactive mode (CI/automated environment):
+- **Audit mode**: Proceed with report generation (safe, read-only + report)
+- **Active mode**: Refuse to make changes, output warning instead
+
+```
+⚠️ doc-maintainer is in active mode but running non-interactively.
+Cannot proceed with documentation changes without user approval.
+Run interactively or switch to audit mode for CI environments.
+```
+
 ## Version
 
-Agent Version: 1.3.0
-Last Updated: 2025-11-29
+Agent Version: 1.3.1
+Last Updated: 2025-11-30
 Compatible with: Claude Code (any version)
