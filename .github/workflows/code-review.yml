@@ -1,4 +1,4 @@
-name: Documentation Review
+name: Code Review
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ env:
   CLAUDE_MODEL: claude-sonnet-4-20250514  # Can be overridden in repository variables
 
 jobs:
-  doc-review:
+  code-review:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -32,16 +32,7 @@ jobs:
           echo "Files changed:"
           cat changed_files.txt
 
-      - name: Read shared principles
-        id: principles
-        run: |
-          if [ -f "shared/documentation-principles.md" ]; then
-            echo "principles_exist=true" >> $GITHUB_OUTPUT
-          else
-            echo "principles_exist=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Run doc-pr-reviewer via Claude API
+      - name: Run code review via Claude API
         id: review
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -49,12 +40,6 @@ jobs:
           # Read the diff and files
           DIFF=$(cat pr_diff.txt | head -c 50000)  # Limit to 50KB
           FILES=$(cat changed_files.txt)
-
-          # Read principles if they exist
-          PRINCIPLES=""
-          if [ -f "shared/documentation-principles.md" ]; then
-            PRINCIPLES=$(cat shared/documentation-principles.md | head -c 30000)
-          fi
 
           # Create the prompt
           cat > prompt.json << 'PROMPT_END'
@@ -64,14 +49,13 @@ jobs:
             "messages": [
               {
                 "role": "user",
-                "content": "You are doc-pr-reviewer, a documentation compliance reviewer.\n\nReview this PR for documentation compliance.\n\n## Documentation Principles\n\nPRINCIPLES_PLACEHOLDER\n\n## Changed Files\n\nFILES_PLACEHOLDER\n\n## Diff\n\n```diff\nDIFF_PLACEHOLDER\n```\n\n## Instructions\n\nApply the compliance checklist:\n- [ ] No existing docs duplicated (DRY principle)\n- [ ] Existing docs updated rather than new ones created\n- [ ] All affected references, TOCs, and indexes updated\n- [ ] No broken links introduced\n- [ ] Temporal documents only appended to (not modified)\n- [ ] Consistent terminology and formatting\n- [ ] No contradictions with existing documentation\n\nProvide a review in this format:\n\n## Documentation Review\n\n### Summary\n- ✅ X checks passed\n- ⚠️ X warnings\n- ❌ X issues\n\n### Issues (if any)\n[List critical issues that should block merge]\n\n### Warnings (if any)\n[List non-blocking concerns]\n\n### Passed\n[List what passed]\n\n---\n*Reviewed by doc-pr-reviewer (automated)*"
+                "content": "You are an expert code reviewer. Review this Pull Request for code quality, bugs, security issues, and best practices.\n\n## Changed Files\n\nFILES_PLACEHOLDER\n\n## Diff\n\n```diff\nDIFF_PLACEHOLDER\n```\n\n## Review Criteria\n\n1. **Bugs & Logic Errors**: Look for potential bugs, off-by-one errors, null/undefined issues, race conditions\n2. **Security**: Check for injection vulnerabilities, exposed secrets, insecure patterns\n3. **Performance**: Identify inefficient algorithms, unnecessary loops, memory leaks\n4. **Code Quality**: Assess readability, naming, duplication, complexity\n5. **Best Practices**: Check for language/framework idioms, error handling, edge cases\n\n## Instructions\n\nProvide a review in this format:\n\n## Code Review\n\n### Summary\n- Overall assessment (1-2 sentences)\n- Risk level: Low/Medium/High\n\n### Issues Found\n\n#### Critical (blocks merge)\n[List any critical bugs or security issues]\n\n#### Suggestions (non-blocking)\n[List improvements and recommendations]\n\n### What Looks Good\n[Positive aspects of the code]\n\n---\n*Reviewed by claude-code-reviewer (automated)*"
               }
             ]
           }
           PROMPT_END
 
           # Replace placeholders (using temp files to handle special chars)
-          echo "$PRINCIPLES" > principles_temp.txt
           echo "$FILES" > files_temp.txt
           echo "$DIFF" > diff_temp.txt
           echo "$CLAUDE_MODEL" > model_temp.txt
@@ -81,9 +65,6 @@ jobs:
 
           with open('prompt.json', 'r') as f:
               data = json.load(f)
-
-          with open('principles_temp.txt', 'r') as f:
-              principles = f.read()
 
           with open('files_temp.txt', 'r') as f:
               files = f.read()
@@ -96,7 +77,6 @@ jobs:
 
           data['model'] = model
           content = data['messages'][0]['content']
-          content = content.replace('PRINCIPLES_PLACEHOLDER', principles[:30000])
           content = content.replace('FILES_PLACEHOLDER', files)
           content = content.replace('DIFF_PLACEHOLDER', diff[:50000])
           data['messages'][0]['content'] = content
@@ -118,11 +98,16 @@ jobs:
           # Save for next step
           echo "$REVIEW" > review.md
 
-          # Check if review contains issues
-          if echo "$REVIEW" | grep -q "❌"; then
-            echo "has_issues=true" >> $GITHUB_OUTPUT
+          # Check if review contains critical issues
+          if echo "$REVIEW" | grep -q "#### Critical"; then
+            # Check if there's actual content after Critical header
+            if echo "$REVIEW" | grep -A5 "#### Critical" | grep -qE "^[^#\[]"; then
+              echo "has_critical=true" >> $GITHUB_OUTPUT
+            else
+              echo "has_critical=false" >> $GITHUB_OUTPUT
+            fi
           else
-            echo "has_issues=false" >> $GITHUB_OUTPUT
+            echo "has_critical=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Post PR review
@@ -131,20 +116,26 @@ jobs:
           script: |
             const fs = require('fs');
             const review = fs.readFileSync('review.md', 'utf8');
-            const hasIssues = '${{ steps.review.outputs.has_issues }}' === 'true';
 
             // Determine review event based on findings
-            // APPROVE = no issues, REQUEST_CHANGES = has issues, COMMENT = warnings only
-            let event = 'COMMENT';
-            if (review.includes('❌')) {
+            let event = 'APPROVE';
+
+            // Check for critical issues (look for content after "#### Critical" header)
+            const criticalMatch = review.match(/#### Critical[^\n]*\n([\s\S]*?)(?=####|###|---|$)/);
+            if (criticalMatch && criticalMatch[1].trim() &&
+                !criticalMatch[1].includes('None') &&
+                !criticalMatch[1].includes('No critical')) {
               event = 'REQUEST_CHANGES';
-            } else if (!review.includes('⚠️') || review.includes('✅')) {
-              event = 'APPROVE';
+            }
+
+            // If high risk, also request changes
+            if (review.toLowerCase().includes('risk level: high')) {
+              event = 'REQUEST_CHANGES';
             }
 
             const body = review + '\n\n---\n*Commit: ${{ github.event.pull_request.head.sha }}*';
 
-            // Dismiss any previous doc-pr-reviewer reviews
+            // Dismiss any previous code-reviewer reviews
             const { data: reviews } = await github.rest.pulls.listReviews({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -152,7 +143,7 @@ jobs:
             });
 
             for (const r of reviews) {
-              if (r.user.type === 'Bot' && r.body && r.body.includes('doc-pr-reviewer')) {
+              if (r.user.type === 'Bot' && r.body && r.body.includes('claude-code-reviewer')) {
                 try {
                   await github.rest.pulls.dismissReview({
                     owner: context.repo.owner,
