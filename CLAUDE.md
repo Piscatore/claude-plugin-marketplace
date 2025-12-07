@@ -94,6 +94,6 @@ Use this when making changes:
 
 | shared/ | doc-maintainer | doc-pr-reviewer |
 |---------|----------------|-----------------|
-| 2.0.0   | 1.8.0          | 1.1.0           |
+| 2.0.0   | 1.9.0          | 1.1.0           |
 
 Update this table when versions change.
