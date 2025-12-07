@@ -34,7 +34,7 @@ This connects your Claude Code instance to the marketplace.
 
 | Plugin ID | Name | Version | Category | Description |
 |-----------|------|---------|----------|-------------|
-| doc-maintainer | Documentation Maintainer | 1.8.0 | productivity | Specialized agent for documentation auditing, maintenance, and bootstrapping. Supports audit, active, and bootstrap modes. |
+| doc-maintainer | Documentation Maintainer | 1.9.0 | productivity | Specialized agent for documentation auditing, maintenance, and bootstrapping. Supports audit, active, and bootstrap modes with document versioning. |
 | doc-pr-reviewer | Documentation PR Reviewer | 1.1.0 | productivity | Reviews Pull Requests for documentation compliance. Supports advisory, strict, and auto-fix modes with web search. |
 
 Use `/plugin show <id>` for detailed information about each plugin.

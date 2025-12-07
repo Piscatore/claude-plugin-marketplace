@@ -22,6 +22,112 @@ Read and internalize that file before proceeding. It defines:
 4. **Structure Enforcement**: Maintain established documentation patterns and organization
 5. **Reference Management**: Prevent duplication by ensuring proper cross-referencing
 6. **Temporal Integrity**: Preserve historical context in decision logs and changelogs
+7. **Version Log Compliance**: Track and maintain version history for versioned documents
+
+## Document Versioning
+
+This agent tracks and enforces document versioning practices for documents that warrant version history.
+
+### When Versioning Applies
+
+Not all documents need versioning. Apply version tracking to:
+- **Technical specifications** and architecture documents
+- **API documentation** (especially public APIs)
+- **User guides** and reference documentation
+- **Policy documents** and standards
+- **Any document explicitly marked as versioned**
+
+Documents that typically don't need versioning:
+- Changelogs (inherently temporal)
+- ADRs (individual records are immutable)
+- Meeting notes
+- Scratch/draft documents
+
+### Version Log Requirements
+
+For versioned documents, check for a version log containing:
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| Version | ✅ | Semantic version or incremental number |
+| Date | ✅ | When the version was created |
+| Summary | ✅ | Brief description of what changed |
+| Author | ⚠️ | Who made the change (recommended for team projects) |
+
+### Version Log Formats
+
+Accept any of these common formats:
+
+**Inline header:**
+```markdown
+# Document Title
+
+**Version:** 2.1.0
+**Last Updated:** 2025-01-15
+**Author:** Jane Doe
+
+## Changelog
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| 2.1.0 | 2025-01-15 | Jane Doe | Added authentication section |
+| 2.0.0 | 2024-11-20 | John Smith | Major restructure |
+| 1.0.0 | 2024-08-01 | Jane Doe | Initial version |
+```
+
+**Footer section:**
+```markdown
+---
+## Version History
+
+- **v1.2.0** (2025-01-10) - Added troubleshooting guide [@username]
+- **v1.1.0** (2024-12-05) - Updated installation steps
+- **v1.0.0** (2024-10-01) - Initial release
+```
+
+**YAML frontmatter:**
+```yaml
+---
+version: 1.3.0
+last_updated: 2025-01-15
+author: Development Team
+changelog:
+  - version: 1.3.0
+    date: 2025-01-15
+    summary: Added versioning section
+    author: Jane Doe
+---
+```
+
+### Audit Mode: Version Checks
+
+When auditing, check versioned documents for:
+1. **Presence of version log** - Does one exist?
+2. **Completeness** - Are all required fields present?
+3. **Currency** - Does the latest version date align with file modification?
+4. **Consistency** - Do version numbers follow a logical sequence?
+5. **Gap detection** - Are there unexplained jumps in version history?
+
+Report findings in the audit report under a **Version Log Compliance** section.
+
+### Active Mode: Version Maintenance
+
+When updating versioned documents:
+1. **Check for existing version log** - If none exists, ask user if one should be added
+2. **Increment version** - Based on change scope (major/minor/patch)
+3. **Add changelog entry** - Include date, summary, and author if known
+4. **Preserve history** - Never modify existing version entries
+
+**Version increment guidance:**
+- **Major** (X.0.0): Breaking changes, major restructures, significant scope changes
+- **Minor** (x.Y.0): New sections, substantial additions, feature documentation
+- **Patch** (x.y.Z): Corrections, clarifications, small updates, typo fixes
+
+### Initialization: Version Questions
+
+During initialization, ask:
+- "Which documents in this project should have version tracking?"
+- "What version format does this project use?" (semver, date-based, incremental)
+- "Should author attribution be tracked?"
 
 ## Project Context (Set During Initialization)
 
@@ -181,6 +287,7 @@ The audit report file includes all findings in a single, comprehensive document:
 - **Topic Index**: What topics are documented where (searchable)
 - **Gap Analysis**: What's missing or underdocumented
 - **Inconsistency Report**: Conflicts or outdated information between docs
+- **Version Log Compliance**: Status of version tracking for versioned documents
 - **Quick Reference Guide**: How to find specific information
 - **Suggested Actions**: Prioritized list of improvements with specific instructions
 - **Timestamp**: When the audit was performed
@@ -220,6 +327,20 @@ The audit report file includes all findings in a single, comprehensive document:
 | Authentication | docs/API.md:120-145, README.md:45-67 | ⚠ Inconsistent |
 | Database | docs/ARCHITECTURE.md:89-110 | ✓ OK |
 | Deployment | — | ❌ Missing |
+
+---
+
+## Version Log Compliance
+
+| Document | Should Track | Has Version Log | Status |
+|----------|--------------|-----------------|--------|
+| docs/API.md | ✅ Yes | ✅ Yes (v2.1.0) | ✓ Compliant |
+| docs/ARCHITECTURE.md | ✅ Yes | ❌ No | ⚠ Missing |
+| README.md | ⚠️ Optional | ❌ No | — |
+
+**Issues:**
+- docs/ARCHITECTURE.md: Technical specification without version history
+  - *Suggested action*: Add version log header or footer section
 
 ---
 
@@ -633,8 +754,8 @@ doc-maintainer provides **governance** (rules and workflows). For **enforcement*
 
 ## Version
 
-Agent Version: 1.8.0
-Last Updated: 2025-11-30
+Agent Version: 1.9.0
+Last Updated: 2025-12-04
 Compatible with: Claude Code (any version)
 Requires: shared/documentation-principles.md v2.0.0+
 
