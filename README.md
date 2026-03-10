@@ -34,7 +34,7 @@ This connects your Claude Code instance to the marketplace.
 
 | Plugin ID | Name | Version | Category | Description |
 |-----------|------|---------|----------|-------------|
-| doc-maintainer | Documentation Maintainer | 1.10.0 | productivity | Specialized agent for documentation auditing, maintenance, and bootstrapping. Supports audit, active, bootstrap, and wiki modes with interview-based onboarding. |
+| doc-maintainer | Documentation Maintainer | 1.10.0 | productivity | Specialized agent for documentation auditing, maintenance, and bootstrapping. Supports standard and wiki content types with audit, active, and bootstrap operations. Interview-based onboarding. |
 | doc-pr-reviewer | Documentation PR Reviewer | 1.1.0 | productivity | Reviews Pull Requests for documentation compliance. Supports advisory, strict, and auto-fix modes with web search. |
 
 Use `/plugin show <id>` for detailed information about each plugin.
@@ -74,7 +74,7 @@ flowchart TD
         WIKIQ -->|No| AUDQ
         WSCOPE --> AUDQ{Audit?}
         AUDQ -->|Yes| RLOC[Ask: report location]
-        AUDQ -->|No| P2END[ ]
+        AUDQ -->|No| P2END[Continue]
         RLOC --> P2END
     end
 
@@ -150,22 +150,22 @@ flowchart LR
 
 ### Operating Modes
 
-doc-maintainer supports 7 operating modes: **Audit** (read-only analysis), **Update Request**, **Proactive Monitoring**, **Consistency Audit**, **Temporal Entry**, **Bootstrap** (scaffold docs for new projects), and **Wiki** (git-synced wiki content without in-document versioning). See [agent.md](doc-maintainer/agents/agent.md) for full mode details.
+doc-maintainer uses a two-axis model: **content type** (Standard or Wiki) combined with an **operation** (Audit, Active, or Bootstrap). The active operation handles several workflows including update requests, proactive monitoring, consistency audits, and temporal entries. See [agent.md](doc-maintainer/agents/agent.md) for full details.
 
 **Quick usage:**
 
 ```bash
-# Standard docs + audit
+# Standard + audit
 Use doc-maintainer to audit my documentation
 
-# Standard docs + active maintenance
+# Standard + active maintenance
 Use doc-maintainer in active mode to update the API docs
 
 # Wiki + active (entire repo)
-Use doc-maintainer in wiki mode on this repository
+Use doc-maintainer on this repository with wiki content type
 
 # Wiki + active (scoped to folder)
-Use doc-maintainer in wiki mode, scoped to the wiki/ folder
+Use doc-maintainer with wiki content type, scoped to the wiki/ folder
 
 # Wiki + audit
 Use doc-maintainer to audit my wiki documentation
