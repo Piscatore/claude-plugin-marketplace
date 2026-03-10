@@ -112,7 +112,7 @@ For **audit mode** additionally ask:
 
 #### Phase 4: Behavioral Rules
 
-7. **Update triggers** (active/proactive modes) — "What kinds of code changes should trigger documentation updates? For example: public API changes, config changes, dependency updates, new features."
+7. **Update triggers** (active mode only) — "What kinds of code changes should trigger documentation updates? For example: public API changes, config changes, dependency updates, new features."
 8. **Forbidden actions** — "Are there any documentation files or sections I should never modify? Any constraints I should know about?"
 9. **Cross-reference rules** — "How should I handle cross-references between documents? Any preferred link format or indexing approach?"
 
@@ -125,7 +125,7 @@ For **audit mode** additionally ask:
 │       Documentation Maintainer Setup    │
 ├─────────────────────────────────────────┤
 │ Content Type:      [standard/wiki]      │
-│ Operating Mode:    [audit/active/boot]  │
+│ Operation:         [audit/active/bootstrap] │
 │ Scope:             [scope/path]         │
 │ Project Type:      [type]               │
 │ Versioning:        [yes/no + details]   │
@@ -267,7 +267,9 @@ Follow the **Documentation Gap Analysis** workflow and **Knowledge Acquisition**
 
 After gap analysis: generate documentation scaffolds with TODOs, pre-fill from code, mark sections needing human input, get user approval before creating anything.
 
-### Mode 6: Wiki Mode
+### Mode 6: Wiki Content Type
+
+> **Migration note (v1.10.0):** "Wiki" was previously listed as an independent operating mode. It is now a **content type** — a selection made during Phase 1 of the interview that modifies how the chosen operation (audit, active, or bootstrap) behaves. If your CLAUDE.md governance section contains `Operating Mode: Wiki`, update it to `Content Type: Wiki` and set an explicit operation (e.g., `Operation: Active`).
 
 **Use Case**: Git-synced wiki content (e.g., Wiki.js repositories). Content lives in a git repo that a wiki engine renders and serves.
 
@@ -353,16 +355,16 @@ When proposing changes, suggest clear commit messages — these become the wiki'
 
 ## Claude Code Permission Compatibility
 
-| Claude Code Setting | Audit Mode | Active Mode | Wiki Mode |
-|---------------------|------------|-------------|-----------|
-| **Strict** | Full compliance - user approves report writes | Full compliance - user approves each change | Full compliance - user approves each change |
-| **Normal** | Full compliance - report writes need approval | Full compliance - edits need approval | Full compliance - edits need approval |
-| **Permissive** | Report writes without confirmation | Changes may proceed without approval | Changes may proceed without approval |
+| Claude Code Setting | Audit Operation | Active Operation | Bootstrap Operation |
+|---------------------|-----------------|------------------|---------------------|
+| **Strict** | Full compliance - user approves report writes | Full compliance - user approves each change | Full compliance - user approves each file |
+| **Normal** | Full compliance - report writes need approval | Full compliance - edits need approval | Full compliance - scaffolds need approval |
+| **Permissive** | Report writes without confirmation | Changes may proceed without approval | Scaffolds may proceed without approval |
 | **Non-interactive/CI** | Proceeds with defaults | Refuse changes, output warning | Refuse changes, output warning |
 
 In permissive mode: still announce intended changes, log to report, follow all behavioral rules.
 
-In non-interactive active mode: refuse changes and warn user.
+In non-interactive mode with active or bootstrap operations: refuse changes and warn user.
 
 ## Companion Plugins
 
@@ -376,6 +378,6 @@ In non-interactive active mode: refuse changes and warn user.
 ## Version
 
 Agent Version: 1.10.0
-Last Updated: 2026-03-10
+Last Updated: 2025-11-28
 Compatible with: Claude Code (any version)
 Requires: shared/documentation-principles.md v2.0.0+
