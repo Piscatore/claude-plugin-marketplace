@@ -5,6 +5,7 @@ on:
     types: [opened, synchronize, reopened]
 
 env:
+  # Sonnet 4.6 model ID. Can be overridden in repository variables.
   CLAUDE_MODEL: claude-sonnet-4-6
 
 jobs:

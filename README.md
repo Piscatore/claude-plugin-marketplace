@@ -41,15 +41,7 @@ Use `/plugin show <id>` for detailed information about each plugin.
 
 ### doc-maintainer Operating Modes
 
-| Mode | Description |
-|------|-------------|
-| **Audit** (Mode 0) | Read-only analysis. Generates a comprehensive report file with findings, gaps, and suggestions. No files are modified. |
-| **Update Request** (Mode 1) | User-initiated documentation updates with change proposals and approval workflow. |
-| **Proactive Monitoring** (Mode 2) | Monitors code changes and suggests documentation updates proactively. |
-| **Consistency Audit** (Mode 3) | Checks all docs for inconsistencies, broken references, and outdated information. |
-| **Temporal Entry** (Mode 4) | Append-only entries to temporal documents (changelogs, ADRs, decision logs). |
-| **Bootstrap** (Mode 5) | Scaffolds documentation for projects with little or no existing docs. Uses code analysis and industry standards. |
-| **Wiki** (Mode 6) | For git-synced wiki content (e.g., Wiki.js). No in-document versioning — git history is the version control. Focuses on content accuracy, link integrity, navigation coherence, and frontmatter consistency. Can be scoped to a specific folder. |
+doc-maintainer supports 7 operating modes: **Audit** (read-only analysis), **Update Request**, **Proactive Monitoring**, **Consistency Audit**, **Temporal Entry**, **Bootstrap** (scaffold docs for new projects), and **Wiki** (git-synced wiki content without in-document versioning). See [agent.md](doc-maintainer/agents/agent.md) for full mode details.
 
 **Quick usage:**
 

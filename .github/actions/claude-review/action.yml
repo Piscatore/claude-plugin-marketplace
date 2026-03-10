@@ -6,16 +6,16 @@ inputs:
     description: Anthropic API key
     required: true
   model:
-    description: Claude model ID
+    description: Claude model ID (e.g., claude-sonnet-4-6)
     required: true
   prompt_template:
-    description: JSON prompt template with MODEL_PLACEHOLDER, FILES_PLACEHOLDER, DIFF_PLACEHOLDER, and optionally PRINCIPLES_PLACEHOLDER
+    description: JSON prompt template with MODEL_PLACEHOLDER, FILES_PLACEHOLDER, DIFF_PLACEHOLDER
     required: true
   reviewer_signature:
     description: Signature string to identify this reviewer (e.g., claude-code-reviewer, doc-pr-reviewer)
     required: true
   has_issues_pattern:
-    description: Grep pattern to detect issues in the review (e.g., "#### Critical" or "❌ [1-9]")
+    description: 'Grep pattern to detect issues in the review (e.g., "#### Critical" or "❌ [1-9]")'
     required: true
   has_issues_secondary_pattern:
     description: Optional secondary grep pattern for content validation after primary match (leave empty to skip)
@@ -48,27 +48,26 @@ runs:
         HAS_ISSUES_PATTERN: ${{ inputs.has_issues_pattern }}
         HAS_ISSUES_SECONDARY: ${{ inputs.has_issues_secondary_pattern }}
         EXTRA_PLACEHOLDERS: ${{ inputs.extra_placeholders }}
+        PROMPT_TEMPLATE: ${{ inputs.prompt_template }}
       run: |
+        set -euo pipefail
+
         # Read the diff and files
-        DIFF=$(cat pr_diff.txt | head -c 50000)
+        DIFF=$(head -c 50000 pr_diff.txt)
         FILES=$(cat changed_files.txt)
 
-        # Write prompt template
-        cat > prompt.json << 'PROMPT_END'
-        ${{ inputs.prompt_template }}
-        PROMPT_END
-
-        # Write temp files for placeholder replacement
+        # Write temp files for placeholder replacement (avoids heredoc injection)
         echo "$FILES" > files_temp.txt
         echo "$DIFF" > diff_temp.txt
         echo "$CLAUDE_MODEL" > model_temp.txt
         echo "$EXTRA_PLACEHOLDERS" > extra_placeholders.txt
+        echo "$PROMPT_TEMPLATE" > prompt_template.txt
 
         python3 << 'PYTHON_END'
-        import json
+        import json, os, sys
 
-        with open('prompt.json', 'r') as f:
-            data = json.load(f)
+        with open('prompt_template.txt', 'r') as f:
+            data = json.loads(f.read())
 
         with open('files_temp.txt', 'r') as f:
             files = f.read()
@@ -85,14 +84,14 @@ runs:
         data['model'] = model
         content = data['messages'][0]['content']
         content = content.replace('FILES_PLACEHOLDER', files)
-        content = content.replace('DIFF_PLACEHOLDER', diff[:50000])
-        import os
+        content = content.replace('DIFF_PLACEHOLDER', diff)
         for key, filepath in extra.items():
             if os.path.isfile(filepath):
                 with open(filepath, 'r') as f:
                     content = content.replace(key, f.read()[:30000])
             else:
-                content = content.replace(key, filepath[:30000])
+                print(f"WARNING: extra_placeholder file not found: {filepath}", file=sys.stderr)
+                content = content.replace(key, '')
         data['messages'][0]['content'] = content
 
         with open('prompt.json', 'w') as f:
@@ -100,12 +99,22 @@ runs:
         PYTHON_END
 
         # Call Claude API with timeout, capture HTTP status code
+        set +e
         HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" --max-time 180 https://api.anthropic.com/v1/messages \
           -H "Content-Type: application/json" \
           -H "x-api-key: $ANTHROPIC_API_KEY" \
           -H "anthropic-version: 2023-06-01" \
           -H "anthropic-beta: interleaved-thinking-2025-05-14" \
           -d @prompt.json)
+        CURL_EXIT=$?
+        set -e
+
+        if [ $CURL_EXIT -ne 0 ]; then
+          echo "curl failed with exit code $CURL_EXIT"
+          printf '## Review Error\n\n❌ **API Error**: curl failed (exit %s). Please check connectivity and try again.\n\n---\n*Reviewed by %s (automated)*\n' "$CURL_EXIT" "$REVIEWER_SIGNATURE" > review.md
+          echo "has_issues=true" >> $GITHUB_OUTPUT
+          exit 0
+        fi
 
         # Split response body and HTTP status code
         HTTP_CODE=$(echo "$HTTP_RESPONSE" | tail -1)
@@ -114,7 +123,7 @@ runs:
         # Check for HTTP errors or API errors in response body
         if [ "$HTTP_CODE" != "200" ] || echo "$RESPONSE" | grep -q '"error"'; then
           echo "API Error (HTTP $HTTP_CODE): $RESPONSE"
-          echo "## Review Error\n\n❌ **API Error** (HTTP $HTTP_CODE): Could not complete review. Please check API key and try again.\n\n---\n*Reviewed by $REVIEWER_SIGNATURE (automated)*" > review.md
+          printf '## Review Error\n\n❌ **API Error** (HTTP %s): Could not complete review. Please check API key and try again.\n\n---\n*Reviewed by %s (automated)*\n' "$HTTP_CODE" "$REVIEWER_SIGNATURE" > review.md
           echo "has_issues=true" >> $GITHUB_OUTPUT
           exit 0
         fi
@@ -128,7 +137,7 @@ runs:
         if echo "$REVIEW" | grep -qE "$HAS_ISSUES_PATTERN"; then
           if [ -n "$HAS_ISSUES_SECONDARY" ]; then
             # Two-stage check: primary match found, now validate with secondary
-            if echo "$REVIEW" | grep -A5 -E "$HAS_ISSUES_PATTERN" | grep -qE "$HAS_ISSUES_SECONDARY"; then
+            if echo "$REVIEW" | grep -A10 -E "$HAS_ISSUES_PATTERN" | grep -qE "$HAS_ISSUES_SECONDARY"; then
               echo "has_issues=true" >> $GITHUB_OUTPUT
             else
               echo "has_issues=false" >> $GITHUB_OUTPUT
@@ -161,7 +170,8 @@ runs:
             event = 'REQUEST_CHANGES';
           }
 
-          const body = review + '\n\n---\n*Commit: ${{ github.event.pull_request.head.sha }}*';
+          const sha = context.payload.pull_request.head.sha;
+          const body = review + `\n\n---\n*Commit: ${sha}*`;
           const signature = process.env.REVIEWER_SIGNATURE;
 
           // Dismiss any previous reviews from this reviewer
