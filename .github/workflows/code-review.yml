@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize, reopened]
 
 env:
-  CLAUDE_MODEL: claude-sonnet-4-20250514  # Can be overridden in repository variables
+  CLAUDE_MODEL: claude-sonnet-4-6  # Can be overridden in repository variables
 
 jobs:
   code-review:
@@ -45,7 +45,11 @@ jobs:
           cat > prompt.json << 'PROMPT_END'
           {
             "model": "MODEL_PLACEHOLDER",
-            "max_tokens": 4096,
+            "max_tokens": 16000,
+            "thinking": {
+              "type": "enabled",
+              "budget_tokens": 8000
+            },
             "messages": [
               {
                 "role": "user",
@@ -86,7 +90,7 @@ jobs:
           PYTHON_END
 
           # Call Claude API with timeout
-          RESPONSE=$(curl -s --max-time 120 https://api.anthropic.com/v1/messages \
+          RESPONSE=$(curl -s --max-time 180 https://api.anthropic.com/v1/messages \
             -H "Content-Type: application/json" \
             -H "x-api-key: $ANTHROPIC_API_KEY" \
             -H "anthropic-version: 2023-06-01" \
@@ -100,8 +104,8 @@ jobs:
             exit 0
           fi
 
-          # Extract the text response
-          REVIEW=$(echo "$RESPONSE" | python3 -c "import sys, json; data = json.load(sys.stdin); print(data.get('content', [{}])[0].get('text', 'Error: Could not get review'))")
+          # Extract the text response (skip thinking blocks, find text block)
+          REVIEW=$(echo "$RESPONSE" | python3 -c "import sys, json; data = json.load(sys.stdin); blocks = data.get('content', []); print(next((b['text'] for b in blocks if b.get('type') == 'text'), 'Error: Could not get review'))")
 
           # Save for next step
           echo "$REVIEW" > review.md

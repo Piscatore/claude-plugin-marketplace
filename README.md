@@ -34,10 +34,38 @@ This connects your Claude Code instance to the marketplace.
 
 | Plugin ID | Name | Version | Category | Description |
 |-----------|------|---------|----------|-------------|
-| doc-maintainer | Documentation Maintainer | 1.9.0 | productivity | Specialized agent for documentation auditing, maintenance, and bootstrapping. Supports audit, active, and bootstrap modes with document versioning. |
+| doc-maintainer | Documentation Maintainer | 1.9.0 | productivity | Specialized agent for documentation auditing, maintenance, and bootstrapping. Supports audit, active, bootstrap, and wiki modes. |
 | doc-pr-reviewer | Documentation PR Reviewer | 1.1.0 | productivity | Reviews Pull Requests for documentation compliance. Supports advisory, strict, and auto-fix modes with web search. |
 
 Use `/plugin show <id>` for detailed information about each plugin.
+
+### doc-maintainer Operating Modes
+
+| Mode | Description |
+|------|-------------|
+| **Audit** (Mode 0) | Read-only analysis. Generates a comprehensive report file with findings, gaps, and suggestions. No files are modified. |
+| **Update Request** (Mode 1) | User-initiated documentation updates with change proposals and approval workflow. |
+| **Proactive Monitoring** (Mode 2) | Monitors code changes and suggests documentation updates proactively. |
+| **Consistency Audit** (Mode 3) | Checks all docs for inconsistencies, broken references, and outdated information. |
+| **Temporal Entry** (Mode 4) | Append-only entries to temporal documents (changelogs, ADRs, decision logs). |
+| **Bootstrap** (Mode 5) | Scaffolds documentation for projects with little or no existing docs. Uses code analysis and industry standards. |
+| **Wiki** (Mode 6) | For git-synced wiki content (e.g., Wiki.js). No in-document versioning — git history is the version control. Focuses on content accuracy, link integrity, navigation coherence, and frontmatter consistency. Can be scoped to a specific folder. |
+
+**Quick usage:**
+
+```bash
+# Audit mode
+Use doc-maintainer to audit my documentation
+
+# Active maintenance
+Use doc-maintainer in active mode to update the API docs
+
+# Wiki mode (entire repo)
+Use doc-maintainer in wiki mode on this repository
+
+# Wiki mode (scoped to folder)
+Use doc-maintainer in wiki mode, scoped to the wiki/ folder
+```
 
 ## Plugin Structure
 
