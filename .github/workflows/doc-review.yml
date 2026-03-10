@@ -1,8 +1,7 @@
 name: Documentation Review
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  workflow_dispatch:  # Disabled automatic PR reviews — run locally instead
 
 env:
   # Sonnet 4.6 model ID. Can be overridden in repository variables.
