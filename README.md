@@ -34,29 +34,141 @@ This connects your Claude Code instance to the marketplace.
 
 | Plugin ID | Name | Version | Category | Description |
 |-----------|------|---------|----------|-------------|
-| doc-maintainer | Documentation Maintainer | 1.9.0 | productivity | Specialized agent for documentation auditing, maintenance, and bootstrapping. Supports audit, active, bootstrap, and wiki modes. |
+| doc-maintainer | Documentation Maintainer | 1.10.0 | productivity | Specialized agent for documentation auditing, maintenance, and bootstrapping. Supports audit, active, bootstrap, and wiki modes with interview-based onboarding. |
 | doc-pr-reviewer | Documentation PR Reviewer | 1.1.0 | productivity | Reviews Pull Requests for documentation compliance. Supports advisory, strict, and auto-fix modes with web search. |
 
 Use `/plugin show <id>` for detailed information about each plugin.
 
-### doc-maintainer Operating Modes
+### doc-maintainer Onboarding Interview
+
+When you first invoke doc-maintainer on a project, it conducts a step-by-step interview to understand your setup. The same interview flow is used for subsequent configuration changes (only affected settings are re-asked).
+
+```mermaid
+flowchart TD
+    Start([Invoke doc-maintainer]) --> P1
+
+    subgraph P1[Phase 1: Mode Selection]
+        CT{Content Type?}
+        CT -->|Standard| STD[Standard Docs\nIn-document versioning]
+        CT -->|Wiki| WIKI[Wiki Content\nGit-based versioning]
+        CT -->|Not sure| EXP1[Explain distinction] --> CT
+
+        STD --> OP
+        WIKI --> OP
+
+        OP{Operation?}
+        OP -->|Audit| AUD[Read-only report\nNo file modifications]
+        OP -->|Active| ACT[Direct updates\nWith approval]
+        OP -->|Bootstrap| BOOT[Scaffold docs\nFor new projects]
+        OP -->|Not sure| EXP2[Explain each] --> OP
+    end
+
+    AUD --> P2
+    ACT --> P2
+    BOOT --> P2
+
+    subgraph P2[Phase 2: Scope & Structure]
+        DISC[Auto-discover docs] --> SCOPE[Confirm scope & project type]
+        SCOPE --> WIKIQ{Wiki?}
+        WIKIQ -->|Yes| WSCOPE[Ask: entire repo or folder?]
+        WIKIQ -->|No| AUDQ
+        WSCOPE --> AUDQ{Audit?}
+        AUDQ -->|Yes| RLOC[Ask: report location]
+        AUDQ -->|No| P2END[ ]
+        RLOC --> P2END
+    end
+
+    P2END --> P3
+
+    subgraph P3[Phase 3: Standards & Conventions]
+        STYLE[Style & conventions] --> VER{Wiki?}
+        VER -->|No| VERPREF[Versioning preferences]
+        VER -->|Yes| AUTHSRC
+        VERPREF --> AUTHSRC[Authoritative sources]
+    end
+
+    AUTHSRC --> P4
+
+    subgraph P4[Phase 4: Behavioral Rules]
+        TRIG{Active mode?}
+        TRIG -->|Yes| UPD[Update triggers]
+        TRIG -->|No| FORB
+        UPD --> FORB[Forbidden actions]
+        FORB --> XREF[Cross-reference rules]
+    end
+
+    XREF --> P5
+
+    subgraph P5[Phase 5: Review & Confirm]
+        SUM[Display config summary] --> OK{Approved?}
+        OK -->|Yes| MAP[Create doc map]
+        OK -->|Change| P1
+        MAP --> CLAUDE[Update CLAUDE.md governance]
+    end
+
+    CLAUDE --> READY([Ready to operate])
+
+    style P1 fill:#e8f4f8,stroke:#2196F3
+    style P2 fill:#f3e8f4,stroke:#9C27B0
+    style P3 fill:#e8f4e8,stroke:#4CAF50
+    style P4 fill:#fef8e8,stroke:#FF9800
+    style P5 fill:#fde8e8,stroke:#f44336
+```
+
+### doc-maintainer Content Type + Operation Matrix
+
+```mermaid
+flowchart LR
+    subgraph ContentType[Content Type]
+        STD[Standard Docs]
+        WIKI[Wiki]
+    end
+
+    subgraph Operations[Operations]
+        AUD[Audit]
+        ACT[Active]
+        BOOT[Bootstrap]
+    end
+
+    STD --> SA[Standard + Audit\nFull report with\nversion log compliance]
+    STD --> SM[Standard + Active\nDirect updates with\nversion tracking]
+    STD --> SB[Standard + Bootstrap\nScaffold with\nversion templates]
+
+    WIKI --> WA[Wiki + Audit\nReport with link integrity,\nfrontmatter & nav checks]
+    WIKI --> WM[Wiki + Active\nContent updates,\nno version logs]
+    WIKI --> WB[Wiki + Bootstrap\nScaffold wiki structure\nwith frontmatter]
+
+    style ContentType fill:#e8f4f8,stroke:#2196F3
+    style Operations fill:#f3e8f4,stroke:#9C27B0
+    style SA fill:#fff,stroke:#666
+    style SM fill:#fff,stroke:#666
+    style SB fill:#fff,stroke:#666
+    style WA fill:#fff,stroke:#666
+    style WM fill:#fff,stroke:#666
+    style WB fill:#fff,stroke:#666
+```
+
+### Operating Modes
 
 doc-maintainer supports 7 operating modes: **Audit** (read-only analysis), **Update Request**, **Proactive Monitoring**, **Consistency Audit**, **Temporal Entry**, **Bootstrap** (scaffold docs for new projects), and **Wiki** (git-synced wiki content without in-document versioning). See [agent.md](doc-maintainer/agents/agent.md) for full mode details.
 
 **Quick usage:**
 
 ```bash
-# Audit mode
+# Standard docs + audit
 Use doc-maintainer to audit my documentation
 
-# Active maintenance
+# Standard docs + active maintenance
 Use doc-maintainer in active mode to update the API docs
 
-# Wiki mode (entire repo)
+# Wiki + active (entire repo)
 Use doc-maintainer in wiki mode on this repository
 
-# Wiki mode (scoped to folder)
+# Wiki + active (scoped to folder)
 Use doc-maintainer in wiki mode, scoped to the wiki/ folder
+
+# Wiki + audit
+Use doc-maintainer to audit my wiki documentation
 ```
 
 ## Plugin Structure
