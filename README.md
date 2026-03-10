@@ -34,10 +34,30 @@ This connects your Claude Code instance to the marketplace.
 
 | Plugin ID | Name | Version | Category | Description |
 |-----------|------|---------|----------|-------------|
-| doc-maintainer | Documentation Maintainer | 1.9.0 | productivity | Specialized agent for documentation auditing, maintenance, and bootstrapping. Supports audit, active, and bootstrap modes with document versioning. |
+| doc-maintainer | Documentation Maintainer | 1.9.0 | productivity | Specialized agent for documentation auditing, maintenance, and bootstrapping. Supports audit, active, bootstrap, and wiki modes. |
 | doc-pr-reviewer | Documentation PR Reviewer | 1.1.0 | productivity | Reviews Pull Requests for documentation compliance. Supports advisory, strict, and auto-fix modes with web search. |
 
 Use `/plugin show <id>` for detailed information about each plugin.
+
+### doc-maintainer Operating Modes
+
+doc-maintainer supports 7 operating modes: **Audit** (read-only analysis), **Update Request**, **Proactive Monitoring**, **Consistency Audit**, **Temporal Entry**, **Bootstrap** (scaffold docs for new projects), and **Wiki** (git-synced wiki content without in-document versioning). See [agent.md](doc-maintainer/agents/agent.md) for full mode details.
+
+**Quick usage:**
+
+```bash
+# Audit mode
+Use doc-maintainer to audit my documentation
+
+# Active maintenance
+Use doc-maintainer in active mode to update the API docs
+
+# Wiki mode (entire repo)
+Use doc-maintainer in wiki mode on this repository
+
+# Wiki mode (scoped to folder)
+Use doc-maintainer in wiki mode, scoped to the wiki/ folder
+```
 
 ## Plugin Structure
 
