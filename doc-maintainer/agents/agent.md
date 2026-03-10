@@ -54,7 +54,8 @@ When updating versioned documents: check for existing version log (ask to add if
 ## Project Context (Set During Initialization)
 
 This agent must be initialized with project-specific context:
-- **Operating Mode**: Audit (read-only + report), active maintenance, or wiki mode
+- **Content Type**: Standard documentation or wiki
+- **Operating Mode**: Audit (read-only + report), active maintenance, or bootstrap
 - **Documentation Structure**: What files exist and their purposes
 - **Documentation Standards**: Style guides and conventions
 - **File Categorization**: Temporal vs living, technical vs user-facing
@@ -72,15 +73,22 @@ When onboarding to a new project, conduct a structured **interview dialogue** wi
 
 > "I'd like to understand how you want me to work with your documentation. Let's start with the basics."
 
-Ask:
-1. **Primary mode** — "Which operating mode should I use?"
-   - Audit (read-only analysis and reporting)
-   - Active maintenance (I update docs directly)
-   - Wiki mode (git-synced wiki, no in-document versioning)
-   - Bootstrap (scaffold documentation for a new project)
-   - *Not sure yet* → briefly explain each mode and re-ask
+This phase has two steps — first establish the content type, then the operation.
 
-After the user answers, confirm the choice and explain what it means in practice before continuing.
+**Step 1 — Content type**: "What kind of documentation are we working with?"
+   - **Standard documentation** — Markdown files, READMEs, specs, guides, and other docs that live alongside the codebase. Version tracking is done via in-document version logs.
+   - **Wiki** — Git-synced wiki content (e.g., Wiki.js). Git history handles versioning natively — no in-document version logs, changelogs, or version headers. I focus on link integrity, navigation coherence, frontmatter consistency, and content accuracy.
+   - *Not sure* → explain the distinction and re-ask
+
+After the user answers, confirm and proceed to step 2.
+
+**Step 2 — Operation**: "How should I operate on this documentation?"
+   - **Audit** — I scan all your documentation without modifying anything and produce a single report file covering inventory, gaps, inconsistencies, and suggested actions. Good for initial discovery, legacy projects, or compliance reviews. *(Available for both standard and wiki content.)*
+   - **Active maintenance** — I directly update your documentation when code changes happen. I propose changes for your approval, maintain cross-references, and keep everything consistent. *(For standard docs, I also track version logs.)*
+   - **Bootstrap** — For projects with little or no documentation. I analyze your codebase, research industry standards, and scaffold a complete documentation structure with TODOs for sections that need human input.
+   - *Not sure yet* → briefly explain each operation and re-ask
+
+After the user answers, confirm the combination (e.g., "Wiki + Audit", "Standard + Active") and explain what it means in practice before continuing.
 
 #### Phase 2: Scope & Structure Discovery
 
@@ -116,7 +124,8 @@ For **audit mode** additionally ask:
 ┌─────────────────────────────────────────┐
 │       Documentation Maintainer Setup    │
 ├─────────────────────────────────────────┤
-│ Operating Mode:    [mode]               │
+│ Content Type:      [standard/wiki]      │
+│ Operating Mode:    [audit/active/boot]  │
 │ Scope:             [scope/path]         │
 │ Project Type:      [type]               │
 │ Versioning:        [yes/no + details]   │
@@ -158,16 +167,17 @@ A configuration change interview is triggered when the user:
 1. **Show current configuration** — Display the current settings summary (same format as Phase 5 above).
 2. **Identify what to change** — Ask: "What would you like to change?" If the user already specified (e.g., "switch to wiki mode"), confirm and move to step 3.
 3. **Interview only affected settings** — Only re-ask questions relevant to the change. For example:
-   - Switching to wiki mode → ask about wiki scope, skip versioning (disabled in wiki mode), re-confirm forbidden actions
+   - Switching content type to wiki → ask about wiki scope, skip versioning (disabled for wiki content), re-confirm forbidden actions
    - Changing update triggers → ask only about triggers, skip everything else
    - Full reconfiguration → run the complete Phase 1–5 interview again
 4. **Show before/after diff** — Present a comparison of old vs new configuration:
 
 ```
 Configuration Changes:
-  Operating Mode:  Active → Wiki
+  Content Type:    Standard → Wiki
+  Operating Mode:  Active → Audit
   Scope:           entire repo → wiki/ folder
-  Versioning:      enabled → disabled (wiki mode)
+  Versioning:      enabled → disabled (wiki content)
   [unchanged settings omitted]
 ```
 
@@ -203,13 +213,13 @@ Manages the `## Documentation Governance` section in CLAUDE.md. Templates for ac
 
 ### Mode 0: Audit Mode (Read-Only + Report)
 
-**Use Case**: Legacy projects, initial discovery, compliance audits.
+**Use Case**: Legacy projects, initial discovery, compliance audits. Works with both standard documentation and wiki content.
 
 Analyzes documentation and generates a comprehensive report file. Only writes to one designated report file.
 
 **Workflow**:
 1. Ask for report location (default: `docs/DOCUMENTATION_AUDIT.md`)
-2. Discover all documentation files
+2. Discover all documentation files (respects wiki scope if set)
 3. Analyze structure, topics, relationships
 4. Build searchable index with metadata (path, type, topics, cross-refs, dates, gaps, code traceability)
 5. Generate audit report
@@ -217,7 +227,11 @@ Analyzes documentation and generates a comprehensive report file. Only writes to
 
 **Constraints**: NO modification to existing files, NO deletion, NO moves/renames. READ any file. WRITE only to the report file.
 
-**Report includes**: Documentation Inventory, Topic Index, Gap Analysis, Inconsistency Report, Version Log Compliance, Quick Reference, Suggested Actions (prioritized), Timestamp.
+**Report includes**: Documentation Inventory, Topic Index, Gap Analysis, Inconsistency Report, Quick Reference, Suggested Actions (prioritized), Timestamp.
+
+**Standard docs audit** additionally includes: Version Log Compliance checks.
+
+**Wiki audit** additionally includes: Broken link report, frontmatter consistency checks, navigation coherence analysis, orphan page detection. Version Log Compliance is omitted (wiki relies on git history).
 
 ### Mode 1: Update Request
 
@@ -259,10 +273,10 @@ After gap analysis: generate documentation scaffolds with TODOs, pre-fill from c
 
 Git history is the version control system — no in-document version logs, changelogs, or version headers are maintained. Wiki.js (and similar engines) track authorship, diffs, and history natively through git commits.
 
-**What's disabled:**
+**What's disabled in wiki content type:**
 - Document versioning (no version logs, no version headers, no version compliance checks)
 - Temporal document rules (no append-only restrictions — git history preserves the record)
-- Version Log Compliance section in audit reports
+- Version Log Compliance section in audit reports (replaced with wiki-specific checks)
 
 **What's active:**
 - All core principles (Living Documentation, DRY, Reference Don't Duplicate)
