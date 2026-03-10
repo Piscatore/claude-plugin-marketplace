@@ -114,6 +114,7 @@ jobs:
             -H "Content-Type: application/json" \
             -H "x-api-key: $ANTHROPIC_API_KEY" \
             -H "anthropic-version: 2023-06-01" \
+            -H "anthropic-beta: interleaved-thinking-2025-05-14" \
             -d @prompt.json)
 
           # Check for API errors
