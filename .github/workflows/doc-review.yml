@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize, reopened]
 
 env:
-  CLAUDE_MODEL: claude-sonnet-4-6  # Can be overridden in repository variables
+  CLAUDE_MODEL: claude-sonnet-4-6
 
 jobs:
   doc-review:
@@ -21,189 +21,40 @@ jobs:
           fetch-depth: 0
 
       - name: Get PR diff
-        id: diff
         run: |
-          # Get the diff between base and head (quoted to prevent injection)
           git diff "origin/${{ github.base_ref }}"..."origin/${{ github.head_ref }}" > pr_diff.txt
-
-          # Get list of changed files
           git diff --name-only "origin/${{ github.base_ref }}"..."origin/${{ github.head_ref }}" > changed_files.txt
-
           echo "Files changed:"
           cat changed_files.txt
 
-      - name: Read shared principles
-        id: principles
+      - name: Prepare principles
         run: |
           if [ -f "shared/documentation-principles.md" ]; then
-            echo "principles_exist=true" >> $GITHUB_OUTPUT
+            head -c 30000 shared/documentation-principles.md > principles_temp.txt
           else
-            echo "principles_exist=false" >> $GITHUB_OUTPUT
+            echo "No shared principles file found." > principles_temp.txt
           fi
 
-      - name: Run doc-pr-reviewer via Claude API
-        id: review
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: |
-          # Read the diff and files
-          DIFF=$(cat pr_diff.txt | head -c 50000)  # Limit to 50KB
-          FILES=$(cat changed_files.txt)
-
-          # Read principles if they exist
-          PRINCIPLES=""
-          if [ -f "shared/documentation-principles.md" ]; then
-            PRINCIPLES=$(cat shared/documentation-principles.md | head -c 30000)
-          fi
-
-          # Create the prompt
-          cat > prompt.json << 'PROMPT_END'
-          {
-            "model": "MODEL_PLACEHOLDER",
-            "max_tokens": 24000,
-            "thinking": {
-              "type": "enabled",
-              "budget_tokens": 8000
-            },
-            "messages": [
-              {
-                "role": "user",
-                "content": "You are doc-pr-reviewer, a documentation compliance reviewer.\n\nReview this PR for documentation compliance.\n\n## Documentation Principles\n\nPRINCIPLES_PLACEHOLDER\n\n## Changed Files\n\nFILES_PLACEHOLDER\n\n## Diff\n\n```diff\nDIFF_PLACEHOLDER\n```\n\n## Instructions\n\nApply the compliance checklist:\n- [ ] No existing docs duplicated (DRY principle)\n- [ ] Existing docs updated rather than new ones created\n- [ ] All affected references, TOCs, and indexes updated\n- [ ] No broken links introduced\n- [ ] Temporal documents only appended to (not modified)\n- [ ] Consistent terminology and formatting\n- [ ] No contradictions with existing documentation\n\nProvide a review in this format:\n\n## Documentation Review\n\n### Summary\n- ✅ X checks passed\n- ⚠️ X warnings\n- ❌ X issues\n\n### Issues (if any)\n[List critical issues that should block merge]\n\n### Warnings (if any)\n[List non-blocking concerns]\n\n### Passed\n[List what passed]\n\n---\n*Reviewed by doc-pr-reviewer (automated)*"
-              }
-            ]
-          }
-          PROMPT_END
-
-          # Replace placeholders (using temp files to handle special chars)
-          echo "$PRINCIPLES" > principles_temp.txt
-          echo "$FILES" > files_temp.txt
-          echo "$DIFF" > diff_temp.txt
-          echo "$CLAUDE_MODEL" > model_temp.txt
-
-          python3 << 'PYTHON_END'
-          import json
-
-          with open('prompt.json', 'r') as f:
-              data = json.load(f)
-
-          with open('principles_temp.txt', 'r') as f:
-              principles = f.read()
-
-          with open('files_temp.txt', 'r') as f:
-              files = f.read()
-
-          with open('diff_temp.txt', 'r') as f:
-              diff = f.read()
-
-          with open('model_temp.txt', 'r') as f:
-              model = f.read().strip()
-
-          data['model'] = model
-          content = data['messages'][0]['content']
-          content = content.replace('PRINCIPLES_PLACEHOLDER', principles[:30000])
-          content = content.replace('FILES_PLACEHOLDER', files)
-          content = content.replace('DIFF_PLACEHOLDER', diff[:50000])
-          data['messages'][0]['content'] = content
-
-          with open('prompt.json', 'w') as f:
-              json.dump(data, f)
-          PYTHON_END
-
-          # Call Claude API with timeout, capture HTTP status code
-          HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" --max-time 180 https://api.anthropic.com/v1/messages \
-            -H "Content-Type: application/json" \
-            -H "x-api-key: $ANTHROPIC_API_KEY" \
-            -H "anthropic-version: 2023-06-01" \
-            -H "anthropic-beta: interleaved-thinking-2025-05-14" \
-            -d @prompt.json)
-
-          # Split response body and HTTP status code
-          HTTP_CODE=$(echo "$HTTP_RESPONSE" | tail -1)
-          RESPONSE=$(echo "$HTTP_RESPONSE" | sed '$d')
-
-          # Check for HTTP errors or API errors in response body
-          if [ "$HTTP_CODE" != "200" ] || echo "$RESPONSE" | grep -q '"error"'; then
-            echo "API Error (HTTP $HTTP_CODE): $RESPONSE"
-            echo "## Documentation Review\n\n❌ **API Error** (HTTP $HTTP_CODE): Could not complete review. Please check API key and try again.\n\n---\n*Reviewed by doc-pr-reviewer (automated)*" > review.md
-            echo "has_issues=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          # Extract the text response (skip thinking blocks, find text block)
-          REVIEW=$(echo "$RESPONSE" | python3 -c "import sys, json; data = json.load(sys.stdin); blocks = data.get('content', []); print(next((b['text'] for b in blocks if b.get('type') == 'text'), 'Error: Could not get review'))")
-
-          # Save for next step
-          echo "$REVIEW" > review.md
-
-          # Check if review contains actual issues (not just "❌ 0 issues")
-          # Look for "❌" followed by a non-zero number
-          if echo "$REVIEW" | grep -qE "❌ [1-9]"; then
-            echo "has_issues=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_issues=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Post PR review
-        uses: actions/github-script@v7
+      - name: Run Claude doc review
+        uses: ./.github/actions/claude-review
         with:
-          script: |
-            const fs = require('fs');
-            const review = fs.readFileSync('review.md', 'utf8');
-            const hasIssues = '${{ steps.review.outputs.has_issues }}' === 'true';
-
-            // Determine review event based on findings
-            // Use the has_issues output from previous step (checks for actual issue content)
-            let event = 'APPROVE';
-            if (hasIssues) {
-              event = 'REQUEST_CHANGES';
-            }
-
-            const body = review + '\n\n---\n*Commit: ${{ github.event.pull_request.head.sha }}*';
-
-            // Dismiss any previous doc-pr-reviewer reviews
-            const { data: reviews } = await github.rest.pulls.listReviews({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number,
-            });
-
-            for (const r of reviews) {
-              if (r.user.type === 'Bot' && r.body && r.body.includes('doc-pr-reviewer')) {
-                try {
-                  await github.rest.pulls.dismissReview({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    pull_number: context.issue.number,
-                    review_id: r.id,
-                    message: 'Superseded by new review'
-                  });
-                } catch (e) {
-                  // May fail if review isn't dismissable, that's ok
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: ${{ env.CLAUDE_MODEL }}
+          reviewer_signature: doc-pr-reviewer
+          has_issues_pattern: "❌ [1-9]"
+          extra_placeholders: '{"PRINCIPLES_PLACEHOLDER": "principles_temp.txt"}'
+          prompt_template: |
+            {
+              "model": "MODEL_PLACEHOLDER",
+              "max_tokens": 24000,
+              "thinking": {
+                "type": "enabled",
+                "budget_tokens": 8000
+              },
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "You are doc-pr-reviewer, a documentation compliance reviewer.\n\nReview this PR for documentation compliance.\n\n## Documentation Principles\n\nPRINCIPLES_PLACEHOLDER\n\n## Changed Files\n\nFILES_PLACEHOLDER\n\n## Diff\n\n```diff\nDIFF_PLACEHOLDER\n```\n\n## Instructions\n\nApply the compliance checklist:\n- [ ] No existing docs duplicated (DRY principle)\n- [ ] Existing docs updated rather than new ones created\n- [ ] All affected references, TOCs, and indexes updated\n- [ ] No broken links introduced\n- [ ] Temporal documents only appended to (not modified)\n- [ ] Consistent terminology and formatting\n- [ ] No contradictions with existing documentation\n\nProvide a review in this format:\n\n## Documentation Review\n\n### Summary\n- ✅ X checks passed\n- ⚠️ X warnings\n- ❌ X issues\n\n### Issues (if any)\n[List critical issues that should block merge]\n\n### Warnings (if any)\n[List non-blocking concerns]\n\n### Passed\n[List what passed]\n\n---\n*Reviewed by doc-pr-reviewer (automated)*"
                 }
-              }
-            }
-
-            // Submit new review
-            try {
-              await github.rest.pulls.createReview({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: context.issue.number,
-                body: body,
-                event: event
-              });
-            } catch (err) {
-              // If APPROVE fails (not permitted), fall back to COMMENT
-              if (event === 'APPROVE' && err.message.includes('not permitted to approve')) {
-                console.log('APPROVE not permitted, falling back to COMMENT');
-                await github.rest.pulls.createReview({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  pull_number: context.issue.number,
-                  body: body + '\n\n*Note: Approval requires repo settings change*',
-                  event: 'COMMENT'
-                });
-              } else {
-                throw err;
-              }
+              ]
             }

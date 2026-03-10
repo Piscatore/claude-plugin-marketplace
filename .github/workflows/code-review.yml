@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize, reopened]
 
 env:
-  CLAUDE_MODEL: claude-sonnet-4-6  # Can be overridden in repository variables
+  CLAUDE_MODEL: claude-sonnet-4-6
 
 jobs:
   code-review:
@@ -21,181 +21,33 @@ jobs:
           fetch-depth: 0
 
       - name: Get PR diff
-        id: diff
         run: |
-          # Get the diff between base and head (quoted to prevent injection)
           git diff "origin/${{ github.base_ref }}"..."origin/${{ github.head_ref }}" > pr_diff.txt
-
-          # Get list of changed files
           git diff --name-only "origin/${{ github.base_ref }}"..."origin/${{ github.head_ref }}" > changed_files.txt
-
           echo "Files changed:"
           cat changed_files.txt
 
-      - name: Run code review via Claude API
-        id: review
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: |
-          # Read the diff and files
-          DIFF=$(cat pr_diff.txt | head -c 50000)  # Limit to 50KB
-          FILES=$(cat changed_files.txt)
-
-          # Create the prompt
-          cat > prompt.json << 'PROMPT_END'
-          {
-            "model": "MODEL_PLACEHOLDER",
-            "max_tokens": 24000,
-            "thinking": {
-              "type": "enabled",
-              "budget_tokens": 8000
-            },
-            "messages": [
-              {
-                "role": "user",
-                "content": "You are an expert code reviewer. Review this Pull Request for code quality, bugs, security issues, and best practices.\n\n## Changed Files\n\nFILES_PLACEHOLDER\n\n## Diff\n\n```diff\nDIFF_PLACEHOLDER\n```\n\n## Review Criteria\n\n1. **Bugs & Logic Errors**: Look for potential bugs, off-by-one errors, null/undefined issues, race conditions\n2. **Security**: Check for injection vulnerabilities, exposed secrets, insecure patterns\n3. **Performance**: Identify inefficient algorithms, unnecessary loops, memory leaks\n4. **Code Quality**: Assess readability, naming, duplication, complexity\n5. **Best Practices**: Check for language/framework idioms, error handling, edge cases\n\n## Instructions\n\nProvide a review in this format:\n\n## Code Review\n\n### Summary\n- Overall assessment (1-2 sentences)\n- Risk level: Low/Medium/High\n\n### Issues Found\n\n#### Critical (blocks merge)\n[List any critical bugs or security issues]\n\n#### Suggestions (non-blocking)\n[List improvements and recommendations]\n\n### What Looks Good\n[Positive aspects of the code]\n\n---\n*Reviewed by claude-code-reviewer (automated)*"
-              }
-            ]
-          }
-          PROMPT_END
-
-          # Replace placeholders (using temp files to handle special chars)
-          echo "$FILES" > files_temp.txt
-          echo "$DIFF" > diff_temp.txt
-          echo "$CLAUDE_MODEL" > model_temp.txt
-
-          python3 << 'PYTHON_END'
-          import json
-
-          with open('prompt.json', 'r') as f:
-              data = json.load(f)
-
-          with open('files_temp.txt', 'r') as f:
-              files = f.read()
-
-          with open('diff_temp.txt', 'r') as f:
-              diff = f.read()
-
-          with open('model_temp.txt', 'r') as f:
-              model = f.read().strip()
-
-          data['model'] = model
-          content = data['messages'][0]['content']
-          content = content.replace('FILES_PLACEHOLDER', files)
-          content = content.replace('DIFF_PLACEHOLDER', diff[:50000])
-          data['messages'][0]['content'] = content
-
-          with open('prompt.json', 'w') as f:
-              json.dump(data, f)
-          PYTHON_END
-
-          # Call Claude API with timeout, capture HTTP status code
-          HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" --max-time 180 https://api.anthropic.com/v1/messages \
-            -H "Content-Type: application/json" \
-            -H "x-api-key: $ANTHROPIC_API_KEY" \
-            -H "anthropic-version: 2023-06-01" \
-            -H "anthropic-beta: interleaved-thinking-2025-05-14" \
-            -d @prompt.json)
-
-          # Split response body and HTTP status code
-          HTTP_CODE=$(echo "$HTTP_RESPONSE" | tail -1)
-          RESPONSE=$(echo "$HTTP_RESPONSE" | sed '$d')
-
-          # Check for HTTP errors or API errors in response body
-          if [ "$HTTP_CODE" != "200" ] || echo "$RESPONSE" | grep -q '"error"'; then
-            echo "API Error (HTTP $HTTP_CODE): $RESPONSE"
-            echo "## Code Review\n\n❌ **API Error** (HTTP $HTTP_CODE): Could not complete review. Please check API key and try again.\n\n---\n*Reviewed by claude-code-reviewer (automated)*" > review.md
-            echo "has_critical=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          # Extract the text response (skip thinking blocks, find text block)
-          REVIEW=$(echo "$RESPONSE" | python3 -c "import sys, json; data = json.load(sys.stdin); blocks = data.get('content', []); print(next((b['text'] for b in blocks if b.get('type') == 'text'), 'Error: Could not get review'))")
-
-          # Save for next step
-          echo "$REVIEW" > review.md
-
-          # Check if review contains critical issues
-          if echo "$REVIEW" | grep -q "#### Critical"; then
-            # Check if there's actual content after Critical header
-            if echo "$REVIEW" | grep -A5 "#### Critical" | grep -qE "^[^#\[]"; then
-              echo "has_critical=true" >> $GITHUB_OUTPUT
-            else
-              echo "has_critical=false" >> $GITHUB_OUTPUT
-            fi
-          else
-            echo "has_critical=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Post PR review
-        uses: actions/github-script@v7
+      - name: Run Claude code review
+        uses: ./.github/actions/claude-review
         with:
-          script: |
-            const fs = require('fs');
-            const review = fs.readFileSync('review.md', 'utf8');
-
-            // Determine review event based on findings
-            let event = 'APPROVE';
-
-            // Check for critical issues (look for content after "#### Critical" header)
-            const criticalMatch = review.match(/#### Critical[^\n]*\n([\s\S]*?)(?=####|###|---|$)/);
-            if (criticalMatch && criticalMatch[1].trim() &&
-                !criticalMatch[1].includes('None') &&
-                !criticalMatch[1].includes('No critical')) {
-              event = 'REQUEST_CHANGES';
-            }
-
-            // If high risk, also request changes
-            if (review.toLowerCase().includes('risk level: high')) {
-              event = 'REQUEST_CHANGES';
-            }
-
-            const body = review + '\n\n---\n*Commit: ${{ github.event.pull_request.head.sha }}*';
-
-            // Dismiss any previous code-reviewer reviews
-            const { data: reviews } = await github.rest.pulls.listReviews({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number,
-            });
-
-            for (const r of reviews) {
-              if (r.user.type === 'Bot' && r.body && r.body.includes('claude-code-reviewer')) {
-                try {
-                  await github.rest.pulls.dismissReview({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    pull_number: context.issue.number,
-                    review_id: r.id,
-                    message: 'Superseded by new review'
-                  });
-                } catch (e) {
-                  // May fail if review isn't dismissable, that's ok
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: ${{ env.CLAUDE_MODEL }}
+          reviewer_signature: claude-code-reviewer
+          has_issues_pattern: "#### Critical"
+          has_issues_secondary_pattern: "^[^#\\[]"
+          risk_level_check: 'true'
+          prompt_template: |
+            {
+              "model": "MODEL_PLACEHOLDER",
+              "max_tokens": 24000,
+              "thinking": {
+                "type": "enabled",
+                "budget_tokens": 8000
+              },
+              "messages": [
+                {
+                  "role": "user",
+                  "content": "You are an expert code reviewer. Review this Pull Request for code quality, bugs, security issues, and best practices.\n\n## Changed Files\n\nFILES_PLACEHOLDER\n\n## Diff\n\n```diff\nDIFF_PLACEHOLDER\n```\n\n## Review Criteria\n\n1. **Bugs & Logic Errors**: Look for potential bugs, off-by-one errors, null/undefined issues, race conditions\n2. **Security**: Check for injection vulnerabilities, exposed secrets, insecure patterns\n3. **Performance**: Identify inefficient algorithms, unnecessary loops, memory leaks\n4. **Code Quality**: Assess readability, naming, duplication, complexity\n5. **Best Practices**: Check for language/framework idioms, error handling, edge cases\n\n## Instructions\n\nProvide a review in this format:\n\n## Code Review\n\n### Summary\n- Overall assessment (1-2 sentences)\n- Risk level: Low/Medium/High\n\n### Issues Found\n\n#### Critical (blocks merge)\n[List any critical bugs or security issues]\n\n#### Suggestions (non-blocking)\n[List improvements and recommendations]\n\n### What Looks Good\n[Positive aspects of the code]\n\n---\n*Reviewed by claude-code-reviewer (automated)*"
                 }
-              }
-            }
-
-            // Submit new review
-            try {
-              await github.rest.pulls.createReview({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: context.issue.number,
-                body: body,
-                event: event
-              });
-            } catch (err) {
-              // If APPROVE fails (not permitted), fall back to COMMENT
-              if (event === 'APPROVE' && err.message.includes('not permitted to approve')) {
-                console.log('APPROVE not permitted, falling back to COMMENT');
-                await github.rest.pulls.createReview({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  pull_number: context.issue.number,
-                  body: body + '\n\n*Note: Approval requires repo settings change*',
-                  event: 'COMMENT'
-                });
-              } else {
-                throw err;
-              }
+              ]
             }
