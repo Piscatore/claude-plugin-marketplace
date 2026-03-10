@@ -109,18 +109,22 @@ jobs:
               json.dump(data, f)
           PYTHON_END
 
-          # Call Claude API with timeout
-          RESPONSE=$(curl -s --max-time 180 https://api.anthropic.com/v1/messages \
+          # Call Claude API with timeout, capture HTTP status code
+          HTTP_RESPONSE=$(curl -s -w "\n%{http_code}" --max-time 180 https://api.anthropic.com/v1/messages \
             -H "Content-Type: application/json" \
             -H "x-api-key: $ANTHROPIC_API_KEY" \
             -H "anthropic-version: 2023-06-01" \
             -H "anthropic-beta: interleaved-thinking-2025-05-14" \
             -d @prompt.json)
 
-          # Check for API errors
-          if echo "$RESPONSE" | grep -q '"error"'; then
-            echo "API Error: $RESPONSE"
-            echo "## Documentation Review\n\n❌ **API Error**: Could not complete review. Please check API key and try again.\n\n---\n*Reviewed by doc-pr-reviewer (automated)*" > review.md
+          # Split response body and HTTP status code
+          HTTP_CODE=$(echo "$HTTP_RESPONSE" | tail -1)
+          RESPONSE=$(echo "$HTTP_RESPONSE" | sed '$d')
+
+          # Check for HTTP errors or API errors in response body
+          if [ "$HTTP_CODE" != "200" ] || echo "$RESPONSE" | grep -q '"error"'; then
+            echo "API Error (HTTP $HTTP_CODE): $RESPONSE"
+            echo "## Documentation Review\n\n❌ **API Error** (HTTP $HTTP_CODE): Could not complete review. Please check API key and try again.\n\n---\n*Reviewed by doc-pr-reviewer (automated)*" > review.md
             echo "has_issues=true" >> $GITHUB_OUTPUT
             exit 0
           fi
