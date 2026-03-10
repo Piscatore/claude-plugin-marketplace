@@ -150,7 +150,7 @@ flowchart LR
 
 ### Operating Modes
 
-doc-maintainer uses a two-axis model: **content type** (Standard or Wiki) combined with an **operation** (Audit, Active, or Bootstrap). Within active mode there are additional sub-modes: Update Request, Proactive Monitoring, Consistency Audit, and Temporal Entry. See [agent.md](doc-maintainer/agents/agent.md) for full mode details.
+doc-maintainer uses a two-axis model: **content type** (Standard or Wiki) combined with an **operation** (Audit, Active, or Bootstrap). The active operation handles several workflows including update requests, proactive monitoring, consistency audits, and temporal entries. See [agent.md](doc-maintainer/agents/agent.md) for full details.
 
 **Quick usage:**
 

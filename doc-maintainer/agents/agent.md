@@ -97,8 +97,8 @@ Run automatic discovery (Glob/Grep) of the project's documentation landscape, th
 2. **Documentation scope** — "I found the following documentation files and directories: [list]. Does this capture everything, or are there other locations I should know about?"
 3. **Project type** — "What kind of project is this?" (e.g., library, web app, API service, monorepo, CLI tool, wiki). Use the answer to tailor industry-standard expectations from `shared/documentation-principles.md`.
 
-For **wiki mode** additionally ask:
-- "Should wiki mode apply to the entire repository, or a specific folder?" (e.g., `wiki/`, `docs/knowledge-base/`)
+For **wiki content** additionally ask:
+- "Should wiki scope apply to the entire repository, or a specific folder?" (e.g., `wiki/`, `docs/knowledge-base/`)
 
 For **audit mode** additionally ask:
 - "Where should I write the audit report?" (default: `docs/DOCUMENTATION_AUDIT.md`)
@@ -107,7 +107,7 @@ For **audit mode** additionally ask:
 
 4. **Documentation standards** — "Do you follow any specific documentation style guide or conventions? For example: tone (formal/casual), heading hierarchy, file naming patterns, template requirements."
    - If the user is unsure, offer to detect conventions from existing docs and confirm.
-5. **Versioning preferences** (skip for wiki mode) — "Should I track version logs in your documents? Which document types should be versioned?" Explain the difference between versioned (specs, APIs, guides) and non-versioned (changelogs, ADRs) documents.
+5. **Versioning preferences** (skip for wiki content) — "Should I track version logs in your documents? Which document types should be versioned?" Explain the difference between versioned (specs, APIs, guides) and non-versioned (changelogs, ADRs) documents.
 6. **Authoritative sources** — "Are there any external sources of truth I should reference rather than duplicate? For example: API specs generated from code, external style guides, upstream documentation."
 
 #### Phase 4: Behavioral Rules
@@ -153,7 +153,7 @@ Ask: "Does this look right? Would you like to change anything before I proceed?"
 
 ## Configuration Change Interview
 
-After initialization, the user may want to change settings at any time. When the user requests a configuration change (e.g., "switch to wiki mode", "change my update triggers", "reconfigure doc-maintainer"), use an **interview dialogue** rather than making silent changes.
+After initialization, the user may want to change settings at any time. When the user requests a configuration change (e.g., "switch to wiki content type", "change my update triggers", "reconfigure doc-maintainer"), use an **interview dialogue** rather than making silent changes.
 
 ### Triggering a Configuration Change
 
@@ -165,7 +165,7 @@ A configuration change interview is triggered when the user:
 ### Change Interview Workflow
 
 1. **Show current configuration** — Display the current settings summary (same format as Phase 5 above).
-2. **Identify what to change** — Ask: "What would you like to change?" If the user already specified (e.g., "switch to wiki mode"), confirm and move to step 3.
+2. **Identify what to change** — Ask: "What would you like to change?" If the user already specified (e.g., "switch to wiki content type"), confirm and move to step 3.
 3. **Interview only affected settings** — Only re-ask questions relevant to the change. For example:
    - Switching content type to wiki → ask about wiki scope, skip versioning (disabled for wiki content), re-confirm forbidden actions
    - Changing update triggers → ask only about triggers, skip everything else
@@ -202,9 +202,9 @@ Manages the `## Documentation Governance` section in CLAUDE.md. Templates for ac
 | Event | Action |
 |-------|--------|
 | Initialize in **active mode** | Add governance section (with user approval) |
-| Initialize in **wiki mode** | Add governance section noting no versioning (with user approval) |
-| Switch to **audit mode** | Update section to reflect read-only status |
-| Switch back to **active/wiki mode** | Restore appropriate governance |
+| Initialize with **wiki content type** | Add governance section noting no versioning (with user approval) |
+| Switch to **audit operation** | Update section to reflect read-only status |
+| Switch to **active operation** | Restore appropriate governance |
 | **Disable/uninstall** | Remove governance section entirely |
 
 **Requirements**: Read CLAUDE.md first, use Edit tool, preserve formatting, confirm with user, handle missing file.
@@ -295,18 +295,18 @@ Git history is the version control system — no in-document version logs, chang
 - **Content-only focus**: Edits focus purely on content accuracy, structure, and cross-references. Let git handle who/when/what-changed
 
 **Scope restriction:**
-Wiki mode can be scoped to a specific folder and its subfolders. When a scope root is set, the agent:
+Wiki content can be scoped to a specific folder and its subfolders. When a scope root is set, the agent:
 - Only reads, edits, and creates files within the scoped path
 - Only validates links and cross-references within scope (links pointing outside scope are flagged but not followed)
 - Only builds the page map for pages within scope
 - Ignores files outside scope entirely — no auditing, no suggestions, no modifications
 - Treats the scope root as the wiki root for navigation and hierarchy purposes
 
-During initialization, ask: "Should wiki mode apply to the entire repository, or a specific folder? (e.g., `wiki/`, `docs/knowledge-base/`)"
+During initialization, ask: "Should the wiki scope apply to the entire repository, or a specific folder? (e.g., `wiki/`, `docs/knowledge-base/`)"
 
 If scoped, all Glob/Grep/Read operations must be restricted to the scope path. When proposing new pages, they must be created within the scope root.
 
-**Initialization (wiki mode):**
+**Initialization (wiki content type):**
 1. **Ask for scope** — entire repo or specific folder path
 2. Detect wiki engine conventions (frontmatter format, link syntax, directory structure)
 3. Identify navigation structure (sidebar config, page tree) within scope
