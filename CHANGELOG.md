@@ -8,6 +8,7 @@ Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 For per-component version history, see the Version section in each agent spec:
 - [doc-maintainer](doc-maintainer/agents/agent.md)
 - [doc-pr-reviewer](doc-pr-reviewer/agents/doc-pr-reviewer.md)
+- [product-advisor](product-advisor/agents/product-advisor.md)
 - [shared principles](shared/documentation-principles.md)
 
 ---

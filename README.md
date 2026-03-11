@@ -208,4 +208,4 @@ See `CLAUDE.md` for detailed workflow and branch naming conventions.
 ## Version
 
 Marketplace Version: 1.0.0
-Last Updated: 2025-11-28
+Last Updated: 2026-03-11
