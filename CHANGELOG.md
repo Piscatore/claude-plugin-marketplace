@@ -8,11 +8,23 @@ Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html
 For per-component version history, see the Version section in each agent spec:
 - [doc-maintainer](doc-maintainer/agents/agent.md)
 - [doc-pr-reviewer](doc-pr-reviewer/agents/doc-pr-reviewer.md)
+- [product-advisor](product-advisor/agents/product-advisor.md)
 - [shared principles](shared/documentation-principles.md)
 
 ---
 
 ## [Unreleased]
+
+## 2026-03-11 (3)
+
+### product-advisor v1.0.0 (New Plugin)
+- Product strategist agent for use case discovery, value prop analysis, feature prioritization, trade-offs, and risk mapping
+- Four user-invocable skills: `/brainstorm`, `/product-review`, `/use-cases`, `/trade-offs`
+- Flexible project context discovery (no fixed spec file required)
+- Challenge mode: configurable intensity dial (low/medium/high) with always-on light questioning and explicit intense mode
+- Two-tier output: scratchpad (writes freely) and true artifacts (asks user, remembers paths)
+- Optional integration with doc-maintainer for documentation delegation
+- Configuration via `productAdvisor` section in `.claude/doc-maintainer.json` or standalone `.claude/product-advisor.json`
 
 ## 2026-03-11 (2)
 

@@ -32,6 +32,18 @@
       },
       "keywords": ["documentation", "pr-review", "compliance", "enforcement", "github"],
       "strict": false
+    },
+    {
+      "name": "product-advisor",
+      "source": "./product-advisor",
+      "description": "Product strategist agent for use case discovery, value prop analysis, feature prioritization, trade-offs, and risk mapping. Includes /brainstorm, /product-review, /use-cases, and /trade-offs skills.",
+      "version": "1.0.0",
+      "author": {
+        "name": "AgentPlugins",
+        "email": "plugins@example.com"
+      },
+      "keywords": ["product", "strategy", "brainstorm", "trade-offs", "use-cases", "prioritization", "decision-making"],
+      "strict": false
     }
   ]
 }

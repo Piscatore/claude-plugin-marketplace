@@ -167,3 +167,4 @@ Study the existing plugins for patterns:
 
 - **doc-maintainer** ([agent.md](../doc-maintainer/agents/agent.md)): Complex agent with multiple operating modes, initialization interview, configuration persistence, content type variations. Good example of a full-featured plugin.
 - **doc-pr-reviewer** ([doc-pr-reviewer.md](../doc-pr-reviewer/agents/doc-pr-reviewer.md)): Focused agent with four operating modes (advisory, strict, auto-fix, CI), config-aware convention inheritance, and structured review output. Good example of a single-purpose plugin with configuration loading.
+- **product-advisor** ([product-advisor.md](../product-advisor/agents/product-advisor.md)): Skills-based plugin with four user-invocable skills (`/brainstorm`, `/product-review`, `/use-cases`, `/trade-offs`). Good example of a plugin that uses the `skills/` directory pattern, flexible project discovery (no fixed spec file), and a two-tier output model (scratchpad vs. true artifacts).

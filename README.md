@@ -36,6 +36,7 @@ This connects your Claude Code instance to the marketplace.
 |-----------|------|---------|----------|-------------|
 | doc-maintainer | Documentation Maintainer | 1.13.0 | productivity | Specialized agent for documentation auditing, maintenance, and bootstrapping. Supports software dev docs and wiki content types with audit, active, and bootstrap operations. Persistent config file. |
 | doc-pr-reviewer | Documentation PR Reviewer | 1.2.0 | productivity | Reviews Pull Requests for documentation compliance. Config-aware with CI automation. Inherits conventions from doc-maintainer. Supports advisory, strict, auto-fix, and CI modes. |
+| product-advisor | Product Advisor | 1.0.0 | productivity | Product strategist agent for use case discovery, value prop analysis, feature prioritization, trade-offs, and risk mapping. Includes /brainstorm, /product-review, /use-cases, and /trade-offs skills. |
 
 Use `/plugin show <id>` for detailed information about each plugin.
 
@@ -67,6 +68,35 @@ Use doc-maintainer to audit the wiki/ folder as wiki content
 # Active maintenance on wiki
 Use doc-maintainer in active mode on wiki content in docs/knowledge-base/
 ```
+
+### product-advisor: How It Works
+
+product-advisor shifts Claude from engineer mode to product strategist mode. It helps with use case discovery, value prop analysis, feature prioritization, trade-off analysis, and risk mapping.
+
+**Skills:** Four user-invocable skills for structured product thinking:
+
+- `/brainstorm` — Structured ideation: diverge, cluster, evaluate, converge
+- `/product-review` — Holistic product analysis: strengths, gaps, opportunities, risks
+- `/use-cases` — Generate structured use case maps with actors, goals, and flows
+- `/trade-offs` — Decision analysis: options, pros/cons, decision matrix, recommendation
+
+**Quick usage:**
+
+```bash
+# Run a brainstorming session
+/brainstorm authentication strategies for our API
+
+# Get a product-level review of the current project
+/product-review
+
+# Map out use cases for a feature
+/use-cases the plugin installation flow
+
+# Analyze a technical decision
+/trade-offs monorepo vs polyrepo for our microservices
+```
+
+**Configuration:** Optional. Add a `productAdvisor` section to `.claude/doc-maintainer.json`, or create `.claude/product-advisor.json`. Works with sensible defaults if no config exists. See [product-advisor.md](product-advisor/agents/product-advisor.md) for details.
 
 ## Plugin Structure
 
@@ -154,7 +184,8 @@ Key directories:
 |-----------|---------|
 | `doc-maintainer/` | Documentation maintenance agent (plugin.json + agent spec) |
 | `doc-pr-reviewer/` | PR review agent (plugin.json + agent spec) |
-| `shared/` | Shared governance principles used by both agents |
+| `product-advisor/` | Product strategist agent (plugin.json + agent spec + skills) |
+| `shared/` | Shared governance principles used by doc-maintainer and doc-pr-reviewer |
 | `docs/` | Architecture docs, plugin development guide, ADRs |
 | `.claude-plugin/` | Marketplace registry |
 | `.claude/` | Agent configuration (doc-maintainer.json) |
@@ -177,4 +208,4 @@ See `CLAUDE.md` for detailed workflow and branch naming conventions.
 ## Version
 
 Marketplace Version: 1.0.0
-Last Updated: 2025-11-28
+Last Updated: 2026-03-11

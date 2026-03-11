@@ -29,6 +29,19 @@ claude-plugin-marketplace/
 │   ├── plugin.json               # Plugin metadata and version
 │   └── agents/
 │       └── doc-pr-reviewer.md    # Agent specification
+├── product-advisor/
+│   ├── plugin.json               # Plugin metadata and version
+│   ├── agents/
+│   │   └── product-advisor.md    # Agent specification
+│   └── skills/
+│       ├── brainstorm/
+│       │   └── SKILL.md          # /brainstorm skill
+│       ├── product-review/
+│       │   └── SKILL.md          # /product-review skill
+│       ├── use-cases/
+│       │   └── SKILL.md          # /use-cases skill
+│       └── trade-offs/
+│           └── SKILL.md          # /trade-offs skill
 ├── shared/
 │   └── documentation-principles.md  # Shared governance principles
 ├── docs/
@@ -59,6 +72,18 @@ doc-maintainer     doc-pr-reviewer
   (v1.13.0)          (v1.2.0)
 ```
 
+### product-advisor (independent)
+
+`product-advisor` does not depend on `shared/documentation-principles.md`. It is a product strategy agent, not a documentation governance agent. It optionally reads `doc-maintainer.json` for configuration and can delegate documentation tasks to doc-maintainer when installed, but has no required dependencies.
+
+```
+product-advisor (v1.0.0)
+    │
+    ├── optionally reads .claude/doc-maintainer.json (productAdvisor section)
+    ├── optionally delegates doc tasks to doc-maintainer
+    └── no dependency on shared/documentation-principles.md
+```
+
 ### Why shared principles?
 
 Both `doc-maintainer` and `doc-pr-reviewer` need to agree on what "good documentation" means. If each agent defined its own rules, they could drift apart -- doc-maintainer might enforce one standard while doc-pr-reviewer checks for a different one.
@@ -72,6 +97,7 @@ By extracting shared logic into `shared/documentation-principles.md`, both agent
 | `shared/documentation-principles.md` | Core principles, document classification, compliance checklist, handling uncertainty, industry standards, gap analysis workflow |
 | `doc-maintainer/agents/agent.md` | Initialization interview, operating modes, versioning logic, wiki content rules, configuration persistence, interaction formatting |
 | `doc-pr-reviewer/agents/doc-pr-reviewer.md` | PR review workflow, issue severity, GitHub integration, advisory/strict/auto-fix/CI modes, config resolution chain, convention inheritance |
+| `product-advisor/agents/product-advisor.md` | Product strategy, use case discovery, trade-off analysis, brainstorming facilitation, challenge mode, scratchpad/artifact output handling |
 
 ### Configuration sharing
 
@@ -85,7 +111,9 @@ The two plugins share project conventions through a config file, avoiding the ne
         │
         ├── style, versioning, forbiddenPaths, ...  (shared conventions)
         │
-        └── prReviewer: { mode, ciEnabled, ... }     (reviewer-specific settings)
+        ├── prReviewer: { mode, ciEnabled, ... }     (reviewer-specific settings)
+        │
+        └── productAdvisor: { outputDir, ... }        (product-advisor settings, optional)
 ```
 
 **Resolution chain** (doc-pr-reviewer checks in order):
