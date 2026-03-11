@@ -24,8 +24,8 @@
     {
       "name": "doc-pr-reviewer",
       "source": "./doc-pr-reviewer",
-      "description": "Reviews Pull Requests for documentation compliance. Supports advisory, strict, and auto-fix modes. Companion to doc-maintainer.",
-      "version": "1.1.0",
+      "description": "Reviews Pull Requests for documentation compliance. Config-aware with CI automation. Inherits conventions from doc-maintainer. Supports advisory, strict, auto-fix, and CI modes.",
+      "version": "1.2.0",
       "author": {
         "name": "AgentPlugins",
         "email": "plugins@example.com"
