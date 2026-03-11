@@ -15,6 +15,18 @@ For per-component version history, see the Version section in each agent spec:
 
 ## [Unreleased]
 
+## 2026-03-11 (4)
+
+### Infrastructure
+- Fixed marketplace version inconsistency (README 1.0.0 → 1.1.0)
+- Added PreToolUse hook for pre-PR review enforcement (.claude/hooks/ + settings.json)
+- Added Pre-PR Validation Checklist to CLAUDE.md
+- Strengthened PR workflow to require validation before PR creation
+
+### Documentation
+- Added ADR-003: Cross-Plugin Delegation pattern
+- Saved initial product review to docs/product/scratch/
+
 ## 2026-03-11 (3)
 
 ### product-advisor v1.0.0 (New Plugin)

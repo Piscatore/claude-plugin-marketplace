@@ -6,11 +6,15 @@
 
 1. Create a feature branch: `git checkout -b feature/description`
 2. Make changes and commit
-3. Push branch: `git push -u origin feature/description`
-4. Create PR: `gh pr create`
-5. Run doc-pr-reviewer: `"Review this PR for documentation compliance"`
+3. **Run Pre-PR Checklist** (MANDATORY before PR creation):
+   a. Run marketplace validation checks (see Pre-PR Validation Checklist below)
+   b. Run doc-pr-reviewer: review the branch diff for documentation compliance
+4. Push branch: `git push -u origin feature/description`
+5. Create PR: `gh pr create`
 6. Address any issues
 7. Merge PR
+
+Claude MUST complete step 3 before executing `gh pr create`. The PreToolUse hook will prompt for confirmation.
 
 ### Using doc-pr-reviewer on this repo
 
@@ -30,6 +34,20 @@ Review the open PR for this branch using doc-pr-reviewer
 - `fix/` - Bug fixes
 - `docs/` - Documentation updates
 - `refactor/` - Code refactoring
+
+## Pre-PR Validation Checklist
+
+Before creating any PR, verify:
+
+1. **JSON validity**: Read `.claude-plugin/marketplace.json` and all `*/plugin.json` files. Confirm valid JSON.
+2. **Required fields**: Each `plugin.json` has: name, version, description, author, agents. Each marketplace entry has: name, source, description, version, author, keywords.
+3. **Version consistency**: For each plugin, verify version matches across:
+   - `[plugin]/plugin.json`
+   - `.claude-plugin/marketplace.json` entry
+   - `README.md` Available Plugins table
+   - `CLAUDE.md` Current Version Compatibility table
+4. **Source paths**: Each `source` in marketplace.json resolves to a directory with a `plugin.json`.
+5. **Marketplace version**: `README.md` marketplace version matches `marketplace.json` metadata version.
 
 ## Project Overview
 

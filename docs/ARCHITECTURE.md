@@ -11,7 +11,10 @@ The marketplace is a collection of Claude Code agent plugins -- Markdown specifi
 ```
 claude-plugin-marketplace/
 ├── .claude/
-│   └── doc-maintainer.json       # Persistent config (shared with doc-pr-reviewer)
+│   ├── doc-maintainer.json       # Persistent config (shared with doc-pr-reviewer)
+│   ├── settings.json             # Project-scope settings (hooks config)
+│   └── hooks/
+│       └── pre-pr-check.sh       # PreToolUse hook for PR creation gate
 ├── .claude-plugin/
 │   └── marketplace.json          # Marketplace registry (plugin catalog)
 ├── .github/
@@ -47,7 +50,9 @@ claude-plugin-marketplace/
 ├── docs/
 │   ├── ARCHITECTURE.md           # This file
 │   ├── plugin-development-guide.md  # Extended guide for plugin authors
-│   └── adr/                      # Architecture Decision Records
+│   ├── adr/                      # Architecture Decision Records
+│   └── product/
+│       └── scratch/              # Product review artifacts and working notes
 ├── CLAUDE.md                     # Development instructions and versioning rules
 ├── CHANGELOG.md                  # Project-wide changelog
 ├── CONTRIBUTING.md               # Contributor guide
@@ -152,6 +157,10 @@ The composite action supports:
 - Extended thinking via anthropic-beta header
 
 Both workflows are currently set to `workflow_dispatch` (manual trigger) rather than automatic PR triggers.
+
+## Hook-Based Automation
+
+A PreToolUse hook in `.claude/settings.json` gates PR creation. When Claude attempts to run `gh pr create` via the Bash tool, the hook script (`.claude/hooks/pre-pr-check.sh`) intercepts the call and prompts the user to confirm that the Pre-PR Validation Checklist has been completed. This enforces the validation workflow defined in `CLAUDE.md` at the tooling level.
 
 ## Plugin Discovery
 
