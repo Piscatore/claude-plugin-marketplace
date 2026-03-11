@@ -33,10 +33,11 @@ Review the open PR for this branch using doc-pr-reviewer
 
 ## Project Overview
 
-This repository contains Claude Code plugins for documentation governance:
+This repository contains Claude Code plugins:
 - `doc-maintainer` - Documentation auditing and maintenance agent
 - `doc-pr-reviewer` - PR review agent for documentation compliance
-- `shared/documentation-principles.md` - Shared principles used by both agents
+- `product-advisor` - Product strategist agent for use case discovery, trade-offs, and feature prioritization
+- `shared/documentation-principles.md` - Shared principles used by doc-maintainer and doc-pr-reviewer
 
 ## Shared Dependencies Architecture
 
@@ -92,9 +93,9 @@ Use this when making changes:
 
 ## Current Version Compatibility
 
-| shared/ | doc-maintainer | doc-pr-reviewer |
-|---------|----------------|-----------------|
-| 2.0.0   | 1.13.0         | 1.2.0           |
+| shared/ | doc-maintainer | doc-pr-reviewer | product-advisor |
+|---------|----------------|-----------------|-----------------|
+| 2.0.0   | 1.13.0         | 1.2.0           | 1.0.0           |
 
 Update this table when versions change.
 
