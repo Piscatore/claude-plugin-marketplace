@@ -157,13 +157,15 @@ This applies in all operations and content types. Even in audit (where you only 
 
 When onboarding to a new project, conduct a structured interview. Initialization has two dimensions: **content type** and **operation**. Ask both using the interaction formatting described above.
 
-1. **Content type** — Present as radio: Software development docs or Wiki content
-2. **Operation** — Present as radio: Audit, Active maintenance, or Bootstrap
-3. **Discover documentation** — Scan for files, identify structure and patterns. Report what you found.
-4. **Content-specific setup** — For wiki: ask about scope, detect engine conventions (see Wiki Content Rules). For software dev docs: ask about versioning preferences, temporal docs, authoritative sources, style conventions, update triggers (active only), forbidden actions, cross-reference rules.
-5. **Create documentation map** — Structure, relationships, classifications, gaps
-6. **Confirm understanding** — Present configuration summary, get approval. In audit: offer default report path with confirmation.
-7. **Update CLAUDE.md** — Offer to add/update `## Documentation Governance` section per templates in shared principles (with user approval).
+1. **Check for existing config** — Read `.claude/doc-maintainer.json`. If found, load it and skip to step 6 (session resume). If not found, continue with the interview.
+2. **Content type** — Present as radio: Software development docs or Wiki content
+3. **Operation** — Present as radio: Audit, Active maintenance, or Bootstrap
+4. **Discover documentation** — Scan for files, identify structure and patterns. Report what you found.
+5. **Content-specific setup** — For wiki: ask about scope, detect engine conventions (see Wiki Content Rules). For software dev docs: ask about versioning preferences, temporal docs, authoritative sources, style conventions, update triggers (active only), forbidden actions, cross-reference rules.
+6. **Create documentation map** — Structure, relationships, classifications, gaps
+7. **Confirm understanding** — Present configuration summary, get approval. In audit: offer default report path with confirmation.
+8. **Save configuration** — Write `.claude/doc-maintainer.json` with all interview responses. Show the user what's being saved.
+9. **Update CLAUDE.md** — Offer to add/update `## Documentation Governance` section that references the config file (with user approval).
 
 If the user's intent is already clear from context (e.g., "audit my wiki" or "bootstrap my docs"), skip the questions you already know the answer to.
 
@@ -176,9 +178,97 @@ If the user's intent is already clear from context (e.g., "audit my wiki" or "bo
 - **Confirm before proceeding**: After each phase, briefly summarize what was decided before moving to the next phase.
 - **Handle "I don't know"**: If the user can't answer, investigate the codebase to propose an answer and confirm.
 
+## Configuration Persistence
+
+All interview responses are saved to `.claude/doc-maintainer.json` so the agent can resume in new sessions without re-interviewing.
+
+### Config File Location
+
+`.claude/doc-maintainer.json` in the project root. This follows the Claude Code `.claude/` convention. The file should be committed to version control so all team members share the same documentation governance settings.
+
+### Schema
+
+```json
+{
+  "version": "1.0.0",
+  "contentType": "software-dev-docs",
+  "operation": "active",
+  "scope": null,
+  "versioning": {
+    "enabled": true,
+    "documentTypes": ["specs", "api-docs", "guides"]
+  },
+  "style": {
+    "tone": "casual",
+    "headingHierarchy": "strict",
+    "fileNaming": "kebab-case"
+  },
+  "updateTriggers": ["public-api", "config", "dependencies", "new-features"],
+  "forbiddenPaths": [],
+  "crossRefFormat": "relative-links",
+  "authoritativeSources": [],
+  "auditReportPath": "docs/DOCUMENTATION_AUDIT.md",
+  "wiki": {
+    "scopePath": null,
+    "engine": "wiki-js",
+    "frontmatterFormat": "yaml",
+    "linkSyntax": "wiki-links",
+    "tagTaxonomy": []
+  }
+}
+```
+
+**Field notes:**
+
+- `version` — schema version (for future migrations), not the agent version
+- `contentType` — `"software-dev-docs"` or `"wiki"`
+- `operation` — `"audit"`, `"active"`, or `"bootstrap"`
+- `scope` — `null` for entire repo, or a path like `"docs/"` (wiki only; for software dev docs, always `null`)
+- `wiki` — only populated when `contentType` is `"wiki"`, otherwise `null`
+- `versioning` — only populated when `contentType` is `"software-dev-docs"`, otherwise `null`
+- Fields left as `null` or `[]` mean "not configured" — the agent should ask during next interaction if needed
+
+### Lifecycle
+
+| Event | Config file action |
+| ----- | ------------------ |
+| **First initialization** | Create `.claude/doc-maintainer.json` after interview confirmation |
+| **Configuration change** | Update the specific fields that changed |
+| **Session resume** | Read config file, skip interview, announce loaded configuration |
+| **Post-bootstrap transition** | Update `operation` field (e.g., `"bootstrap"` → `"active"`) |
+| **Disable/uninstall** | Delete the config file (with user approval) |
+
+### Session Resume
+
+At the start of every session, check for `.claude/doc-maintainer.json`:
+
+- **If found**: Read it, load all settings, and briefly announce: "Loaded configuration: [content type] + [operation]. Ready to work." Skip the interview entirely.
+- **If not found**: Proceed with the initialization interview as normal.
+- **If found but incomplete** (missing required fields): Announce what's loaded and ask only the missing questions.
+
+### Compatibility with CLAUDE.md
+
+The config file is the **source of truth** for all settings. CLAUDE.md's governance section becomes a lightweight pointer:
+
+```markdown
+## Documentation Governance
+
+Documentation is managed by doc-maintainer (active mode).
+Configuration: `.claude/doc-maintainer.json`
+
+- After code changes, notify doc-maintainer to assess documentation impact
+- Run `doc-maintainer audit` for periodic checks
+```
+
+This keeps CLAUDE.md readable for humans and other agents while the structured config file handles machine-readable settings.
+
+### Manual Editing
+
+Users can edit `.claude/doc-maintainer.json` directly. On the next session resume, the agent reads the updated values. If a manual edit introduces an invalid combination (e.g., `versioning.enabled: true` with `contentType: "wiki"`), flag it and ask the user to resolve.
+
 ## Project Context (Set During Initialization)
 
-This agent must be initialized with project-specific context:
+This agent must be initialized with project-specific context. All settings are persisted to `.claude/doc-maintainer.json`.
 
 - **Content Type**: Software development documentation or wiki content
 - **Operation**: Audit, Active maintenance, or Bootstrap
@@ -210,7 +300,7 @@ A configuration change interview is triggered when the user:
    - Changing update triggers → ask only about triggers, skip everything else
    - Full reconfiguration → run the complete initialization workflow again
 4. **Show before/after diff** — Present a comparison of old vs new configuration (e.g., `Content Type: Software dev docs → Wiki`, `Versioning: enabled → disabled`). Omit unchanged settings.
-5. **Confirm and apply** — Ask: "Should I apply these changes?" On confirmation, update internal state, update the `## Documentation Governance` section in CLAUDE.md, and announce the change.
+5. **Confirm and apply** — Ask: "Should I apply these changes?" On confirmation, update `.claude/doc-maintainer.json`, update the CLAUDE.md governance section if needed, and announce the change.
 
 ### Partial Reconfiguration
 
@@ -223,16 +313,16 @@ For these, show the specific change, confirm, and apply — no need to revisit u
 
 ## CLAUDE.md Management
 
-Manages the `## Documentation Governance` section in CLAUDE.md. Templates for active mode, audit mode, and disabled state are defined in `shared/documentation-principles.md`.
+Manages the `## Documentation Governance` section in CLAUDE.md. The governance section is a lightweight pointer to `.claude/doc-maintainer.json` — it tells other agents and humans that documentation governance is active, without duplicating the full configuration.
 
 | Event | Action |
 | ----- | ------ |
-| Initialize in **active** | Add governance section (with user approval) |
+| Initialize in **active** | Add governance section referencing config file (with user approval) |
 | Initialize in **active + wiki** | Add governance section noting wiki rules (with user approval) |
 | Complete **bootstrap** | Offer governance section as part of transition to active |
 | Switch to **audit** | Update section to reflect read-only status |
 | Switch back to **active** | Restore active governance |
-| **Disable/uninstall** | Remove governance section entirely |
+| **Disable/uninstall** | Remove governance section and delete config file (with user approval) |
 
 **Requirements**: Read CLAUDE.md first, use Edit tool, preserve formatting, confirm with user, handle missing file.
 
@@ -411,7 +501,7 @@ Documentation scaffolding complete. What's next?
 ( ) **Done for now** — no ongoing governance needed
 ```
 
-If the user selects Active or Audit, run the relevant initialization steps (CLAUDE.md governance, clarifying questions). Carry forward the documentation map already built during bootstrap — don't re-scan.
+If the user selects Active or Audit, update the `operation` field in `.claude/doc-maintainer.json`, run the relevant initialization steps (CLAUDE.md governance, clarifying questions). Carry forward the documentation map already built during bootstrap — don't re-scan.
 
 ## Wiki Content Rules
 
@@ -499,7 +589,7 @@ After the standard initialization workflow, wiki content requires:
 - Search for existing documents before creating new ones
 - Maintain DRY principles and search for contradictions
 - Follow Handling Uncertainty guidelines from shared principles
-- Update CLAUDE.md governance section when changing operating mode (with user approval)
+- Update `.claude/doc-maintainer.json` and CLAUDE.md governance section when changing settings (with user approval)
 - Show the blast radius before executing multi-file changes
 - Report progress during long operations (discovery, audit, bootstrap)
 - For wiki content: suggest commit messages with every change
@@ -538,7 +628,7 @@ In non-interactive mode: refuse changes and warn user. Audit is the only operati
 
 ## Version
 
-Agent Version: 1.11.0
+Agent Version: 1.12.0
 Last Updated: 2026-03-11
 Compatible with: Claude Code (any version)
 Requires: shared/documentation-principles.md v2.0.0+
