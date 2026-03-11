@@ -91,26 +91,7 @@ This project follows strict semver. The rules differ depending on what you chang
 - Increment the **patch version of BOTH** dependent plugins
 - Update all version references (see checklist below)
 
-See [CLAUDE.md](CLAUDE.md) for the full versioning rules and file update checklist.
-
-### File Update Checklist
-
-When changing shared principles:
-- [ ] `shared/documentation-principles.md` -- version + content
-- [ ] `doc-maintainer/plugin.json` -- version
-- [ ] `doc-maintainer/agents/agent.md` -- version
-- [ ] `doc-pr-reviewer/plugin.json` -- version
-- [ ] `doc-pr-reviewer/agents/doc-pr-reviewer.md` -- version
-- [ ] `.claude-plugin/marketplace.json` -- versions
-- [ ] `README.md` -- version table
-- [ ] `CLAUDE.md` -- compatibility table
-
-When changing a single plugin:
-- [ ] `[plugin]/plugin.json` -- version
-- [ ] `[plugin]/agents/[agent].md` -- version
-- [ ] `.claude-plugin/marketplace.json` -- version
-- [ ] `README.md` -- version table
-- [ ] `CLAUDE.md` -- compatibility table
+See [CLAUDE.md](CLAUDE.md) for the full versioning rules and the file update checklist to follow when making changes.
 
 ## Agent Specification Guidelines
 

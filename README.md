@@ -146,38 +146,18 @@ Task(
 
 ## Repository Structure
 
-```
-claude-plugin-marketplace/
-├── .claude-plugin/
-│   └── marketplace.json          # Marketplace registry (required)
-├── .github/
-│   ├── actions/
-│   │   └── claude-review/
-│   │       └── action.yml        # Shared composite action for PR reviews
-│   └── workflows/
-│       ├── code-review.yml       # General code review (manual trigger)
-│       └── doc-review.yml        # Documentation compliance review (manual trigger)
-├── doc-maintainer/
-│   ├── plugin.json               # Plugin metadata
-│   └── agents/
-│       └── agent.md              # Agent specification
-├── doc-pr-reviewer/
-│   ├── plugin.json               # Plugin metadata
-│   └── agents/
-│       └── doc-pr-reviewer.md    # Agent specification
-├── shared/
-│   └── documentation-principles.md  # Shared governance principles
-├── docs/
-│   ├── ARCHITECTURE.md           # Architecture and dependency model
-│   ├── plugin-development-guide.md  # Extended guide for plugin authors
-│   └── adr/                      # Architecture Decision Records
-├── CHANGELOG.md                  # Project-wide changelog
-├── CLAUDE.md                     # Development instructions and versioning rules
-├── CONTRIBUTING.md               # Contributor guide
-├── LICENSE                       # MIT license
-├── README.md                     # This file
-└── SECURITY.md                   # Security policy
-```
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full repository structure, dependency model, and configuration sharing architecture.
+
+Key directories:
+
+| Directory | Purpose |
+|-----------|---------|
+| `doc-maintainer/` | Documentation maintenance agent (plugin.json + agent spec) |
+| `doc-pr-reviewer/` | PR review agent (plugin.json + agent spec) |
+| `shared/` | Shared governance principles used by both agents |
+| `docs/` | Architecture docs, plugin development guide, ADRs |
+| `.claude-plugin/` | Marketplace registry |
+| `.claude/` | Agent configuration (doc-maintainer.json) |
 
 ## Plugin Development Workflow
 
