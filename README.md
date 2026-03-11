@@ -197,11 +197,12 @@ When modifying a plugin:
 1. **Create branch**: `git checkout -b feature/description`
 2. **Edit** the agent spec: `<plugin-id>/agents/<plugin-id>.md`
 3. **Update version** in `<plugin-id>/plugin.json`
-4. **Commit and push branch**: `git push -u origin feature/description`
-5. **Create PR**: `gh pr create`
-6. **Review**: Run doc-pr-reviewer on the PR
-7. **Merge** after review passes
-8. **Update locally**: `/plugin update` or reinstall the plugin
+4. **Run Pre-PR Validation Checklist** (see [CLAUDE.md](CLAUDE.md#pre-pr-validation-checklist))
+5. **Commit and push branch**: `git push -u origin feature/description`
+6. **Create PR**: `gh pr create`
+7. **Review**: Run doc-pr-reviewer on the PR
+8. **Merge** after review passes
+9. **Update locally**: `/plugin update` or reinstall the plugin
 
 See `CLAUDE.md` for detailed workflow and branch naming conventions.
 
