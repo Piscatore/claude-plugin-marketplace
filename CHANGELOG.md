@@ -14,6 +14,28 @@ For per-component version history, see the Version section in each agent spec:
 
 ## [Unreleased]
 
+## 2026-03-11 (2)
+
+### doc-pr-reviewer v1.2.0
+- Added CI mode (Mode 4) for fully unattended, config-driven PR reviews
+- Added config resolution chain: `.claude/doc-maintainer.json` > `.claude/doc-pr-reviewer.json` > CLAUDE.md governance > defaults
+- Convention inheritance from doc-maintainer config (style, versioning, forbidden paths, authoritative sources, update triggers)
+- Added `prReviewer` section schema for embedding reviewer settings in doc-maintainer config
+- Added standalone `doc-pr-reviewer.json` schema for projects without doc-maintainer
+- Added config validation with clear error messages for invalid values
+- Added idempotent review comments (updates existing comment on re-runs)
+- Added CI error handling table (missing config, validation failures, no doc impact, missing `gh` CLI)
+
+### Project Documentation Bootstrap
+- Added MIT LICENSE
+- Added CHANGELOG.md (project-wide changelog)
+- Added CONTRIBUTING.md (contributor guide with versioning rules and checklists)
+- Added SECURITY.md (security policy)
+- Added docs/ARCHITECTURE.md (shared dependency model, CI/CD architecture, plugin discovery)
+- Added docs/plugin-development-guide.md (extended guide for plugin authors)
+- Added docs/adr/ with template and two ADRs (shared principles, interview onboarding)
+- Added `.claude/doc-maintainer.json` (persistent doc-maintainer config)
+
 ## 2026-03-11
 
 ### doc-maintainer v1.13.0

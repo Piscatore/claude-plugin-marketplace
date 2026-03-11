@@ -127,6 +127,16 @@ When writing or modifying agent specs:
 
 Both `doc-maintainer` and `doc-pr-reviewer` depend on `shared/documentation-principles.md` for common governance logic. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for a full explanation of this dependency model.
 
+## PR Reviewer Configuration
+
+`doc-pr-reviewer` can read project conventions from the doc-maintainer config file. If you want to customize review behavior:
+
+**If doc-maintainer is configured** (`.claude/doc-maintainer.json` exists): add an optional `prReviewer` section to the existing config to set mode, severity overrides, and ignored paths. The reviewer inherits style, versioning, forbidden paths, and other conventions automatically.
+
+**If doc-maintainer is not configured**: create `.claude/doc-pr-reviewer.json` with both project conventions and reviewer settings in a single file. See [doc-pr-reviewer.md](doc-pr-reviewer/agents/doc-pr-reviewer.md) for the full schema.
+
+For CI mode (automated, non-interactive reviews), a config file is mandatory. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the config resolution chain.
+
 ## CI/CD
 
 Two GitHub Actions workflows exist (currently set to manual trigger via `workflow_dispatch`):

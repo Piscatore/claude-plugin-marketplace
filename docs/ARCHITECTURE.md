@@ -10,6 +10,8 @@ The marketplace is a collection of Claude Code agent plugins -- Markdown specifi
 
 ```
 claude-plugin-marketplace/
+├── .claude/
+│   └── doc-maintainer.json       # Persistent config (shared with doc-pr-reviewer)
 ├── .claude-plugin/
 │   └── marketplace.json          # Marketplace registry (plugin catalog)
 ├── .github/
@@ -54,7 +56,7 @@ shared/documentation-principles.md (v2.0.0)
    │                  │
    ▼                  ▼
 doc-maintainer     doc-pr-reviewer
-  (v1.13.0)          (v1.1.0)
+  (v1.13.0)          (v1.2.0)
 ```
 
 ### Why shared principles?
@@ -69,7 +71,31 @@ By extracting shared logic into `shared/documentation-principles.md`, both agent
 |----------|---------|
 | `shared/documentation-principles.md` | Core principles, document classification, compliance checklist, handling uncertainty, industry standards, gap analysis workflow |
 | `doc-maintainer/agents/agent.md` | Initialization interview, operating modes, versioning logic, wiki content rules, configuration persistence, interaction formatting |
-| `doc-pr-reviewer/agents/doc-pr-reviewer.md` | PR review workflow, issue severity, GitHub integration, advisory/strict/auto-fix modes |
+| `doc-pr-reviewer/agents/doc-pr-reviewer.md` | PR review workflow, issue severity, GitHub integration, advisory/strict/auto-fix/CI modes, config resolution chain, convention inheritance |
+
+### Configuration sharing
+
+The two plugins share project conventions through a config file, avoiding the need to configure rules in two places.
+
+```
+.claude/doc-maintainer.json
+        │
+        │  doc-maintainer writes during onboarding
+        │  doc-pr-reviewer reads at review time
+        │
+        ├── style, versioning, forbiddenPaths, ...  (shared conventions)
+        │
+        └── prReviewer: { mode, ciEnabled, ... }     (reviewer-specific settings)
+```
+
+**Resolution chain** (doc-pr-reviewer checks in order):
+
+1. `.claude/doc-maintainer.json` -- inherits all project conventions; looks for optional `prReviewer` key for reviewer-specific settings
+2. `.claude/doc-pr-reviewer.json` -- standalone fallback with both conventions and reviewer settings in one file
+3. CLAUDE.md `## Documentation Governance` section -- parsed for mode hints
+4. Defaults -- advisory mode, generic checks only
+
+In CI mode, a config file (option 1 or 2) is mandatory. See [doc-pr-reviewer.md](../doc-pr-reviewer/agents/doc-pr-reviewer.md) for full schema details.
 
 ### Versioning cascade
 
