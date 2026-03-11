@@ -39,24 +39,33 @@ This connects your Claude Code instance to the marketplace.
 
 Use `/plugin show <id>` for detailed information about each plugin.
 
-### doc-maintainer Operating Modes
+### doc-maintainer: How It Works
 
-doc-maintainer supports 7 operating modes: **Audit** (read-only analysis), **Update Request**, **Proactive Monitoring**, **Consistency Audit**, **Temporal Entry**, **Bootstrap** (scaffold docs for new projects), and **Wiki** (git-synced wiki content without in-document versioning). See [agent.md](doc-maintainer/agents/agent.md) for full mode details.
+doc-maintainer operates along two dimensions: **content type** and **operation**.
+
+**Content types:** Software development docs (versioned, temporal rules) or Wiki content (git-synced, no in-document versioning).
+
+**Operations:** Audit (read-only report), Active maintenance (ongoing upkeep), or Bootstrap (scaffold from scratch).
+
+Any operation works with either content type. See [agent.md](doc-maintainer/agents/agent.md) for full details.
 
 **Quick usage:**
 
 ```bash
-# Audit mode
+# Audit your software docs
 Use doc-maintainer to audit my documentation
 
 # Active maintenance
 Use doc-maintainer in active mode to update the API docs
 
-# Wiki mode (entire repo)
-Use doc-maintainer in wiki mode on this repository
+# Bootstrap a new project
+Use doc-maintainer to bootstrap documentation for this project
 
-# Wiki mode (scoped to folder)
-Use doc-maintainer in wiki mode, scoped to the wiki/ folder
+# Audit wiki content (scoped to folder)
+Use doc-maintainer to audit the wiki/ folder as wiki content
+
+# Active maintenance on wiki
+Use doc-maintainer in active mode on wiki content in docs/knowledge-base/
 ```
 
 ## Plugin Structure
