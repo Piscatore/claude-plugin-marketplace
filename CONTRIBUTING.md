@@ -8,10 +8,11 @@ This project uses a PR-based workflow. **Do not push directly to main.**
 
 1. Create a feature branch: `git checkout -b feature/description`
 2. Make changes and commit
-3. Push branch: `git push -u origin feature/description`
-4. Create PR: `gh pr create`
-5. Address review feedback
-6. Merge PR
+3. **Run Pre-PR Validation Checklist** (see [CLAUDE.md](CLAUDE.md#pre-pr-validation-checklist) for full details)
+4. Push branch: `git push -u origin feature/description`
+5. Create PR: `gh pr create`
+6. Address review feedback
+7. Merge PR
 
 ### Branch Naming
 
