@@ -35,7 +35,7 @@ This connects your Claude Code instance to the marketplace.
 | Plugin ID | Name | Version | Category | Description |
 |-----------|------|---------|----------|-------------|
 | doc-maintainer | Documentation Maintainer | 1.13.0 | productivity | Specialized agent for documentation auditing, maintenance, and bootstrapping. Supports software dev docs and wiki content types with audit, active, and bootstrap operations. Persistent config file. |
-| doc-pr-reviewer | Documentation PR Reviewer | 1.1.0 | productivity | Reviews Pull Requests for documentation compliance. Supports advisory, strict, and auto-fix modes with web search. |
+| doc-pr-reviewer | Documentation PR Reviewer | 1.2.0 | productivity | Reviews Pull Requests for documentation compliance. Config-aware with CI automation. Inherits conventions from doc-maintainer. Supports advisory, strict, auto-fix, and CI modes. |
 
 Use `/plugin show <id>` for detailed information about each plugin.
 
@@ -146,16 +146,18 @@ Task(
 
 ## Repository Structure
 
-```
-claude-plugin-marketplace/
-├── .claude-plugin/
-│   └── marketplace.json       # Marketplace registry (required)
-├── doc-maintainer/
-│   ├── plugin.json            # Plugin metadata
-│   └── agents/
-│       └── doc-maintainer.md  # Agent specification (EDIT HERE)
-└── README.md
-```
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full repository structure, dependency model, and configuration sharing architecture.
+
+Key directories:
+
+| Directory | Purpose |
+|-----------|---------|
+| `doc-maintainer/` | Documentation maintenance agent (plugin.json + agent spec) |
+| `doc-pr-reviewer/` | PR review agent (plugin.json + agent spec) |
+| `shared/` | Shared governance principles used by both agents |
+| `docs/` | Architecture docs, plugin development guide, ADRs |
+| `.claude-plugin/` | Marketplace registry |
+| `.claude/` | Agent configuration (doc-maintainer.json) |
 
 ## Plugin Development Workflow
 
