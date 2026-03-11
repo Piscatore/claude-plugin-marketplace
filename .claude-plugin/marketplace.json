@@ -12,8 +12,8 @@
     {
       "name": "doc-maintainer",
       "source": "./doc-maintainer",
-      "description": "Specialized agent for documentation auditing, maintenance, and bootstrapping. Supports standard and wiki content types with audit, active, and bootstrap operations.",
-      "version": "1.10.0",
+      "description": "Specialized agent for documentation auditing, maintenance, and bootstrapping. Supports software dev docs and wiki content types with audit, active, and bootstrap operations.",
+      "version": "1.11.0",
       "author": {
         "name": "AgentPlugins",
         "email": "plugins@example.com"

@@ -34,141 +34,38 @@ This connects your Claude Code instance to the marketplace.
 
 | Plugin ID | Name | Version | Category | Description |
 |-----------|------|---------|----------|-------------|
-| doc-maintainer | Documentation Maintainer | 1.10.0 | productivity | Specialized agent for documentation auditing, maintenance, and bootstrapping. Supports standard and wiki content types with audit, active, and bootstrap operations. Interview-based onboarding. |
+| doc-maintainer | Documentation Maintainer | 1.11.0 | productivity | Specialized agent for documentation auditing, maintenance, and bootstrapping. Supports software dev docs and wiki content types with audit, active, and bootstrap operations. Interview-based onboarding. |
 | doc-pr-reviewer | Documentation PR Reviewer | 1.1.0 | productivity | Reviews Pull Requests for documentation compliance. Supports advisory, strict, and auto-fix modes with web search. |
 
 Use `/plugin show <id>` for detailed information about each plugin.
 
-### doc-maintainer Onboarding Interview
+### doc-maintainer: How It Works
 
-When you first invoke doc-maintainer on a project, it conducts a step-by-step interview to understand your setup. The same interview flow is used for subsequent configuration changes (only affected settings are re-asked).
+doc-maintainer operates along two dimensions: **content type** and **operation**.
 
-```mermaid
-flowchart TD
-    Start([Invoke doc-maintainer]) --> P1
+**Content types:** Software development docs (versioned, temporal rules) or Wiki content (git-synced, no in-document versioning).
 
-    subgraph P1[Phase 1: Mode Selection]
-        CT{Content Type?}
-        CT -->|Standard| STD[Standard Docs\nIn-document versioning]
-        CT -->|Wiki| WIKI[Wiki Content\nGit-based versioning]
-        CT -->|Not sure| EXP1[Explain distinction] --> CT
+**Operations:** Audit (read-only report), Active maintenance (ongoing upkeep), or Bootstrap (scaffold from scratch).
 
-        STD --> OP
-        WIKI --> OP
-
-        OP{Operation?}
-        OP -->|Audit| AUD[Read-only report\nNo file modifications]
-        OP -->|Active| ACT[Direct updates\nWith approval]
-        OP -->|Bootstrap| BOOT[Scaffold docs\nFor new projects]
-        OP -->|Not sure| EXP2[Explain each] --> OP
-    end
-
-    AUD --> P2
-    ACT --> P2
-    BOOT --> P2
-
-    subgraph P2[Phase 2: Scope & Structure]
-        DISC[Auto-discover docs] --> SCOPE[Confirm scope & project type]
-        SCOPE --> WIKIQ{Wiki?}
-        WIKIQ -->|Yes| WSCOPE[Ask: entire repo or folder?]
-        WIKIQ -->|No| AUDQ
-        WSCOPE --> AUDQ{Audit?}
-        AUDQ -->|Yes| RLOC[Ask: report location]
-        AUDQ -->|No| P2END[Continue]
-        RLOC --> P2END
-    end
-
-    P2END --> P3
-
-    subgraph P3[Phase 3: Standards & Conventions]
-        STYLE[Style & conventions] --> VER{Wiki?}
-        VER -->|No| VERPREF[Versioning preferences]
-        VER -->|Yes| AUTHSRC
-        VERPREF --> AUTHSRC[Authoritative sources]
-    end
-
-    AUTHSRC --> P4
-
-    subgraph P4[Phase 4: Behavioral Rules]
-        TRIG{Active mode?}
-        TRIG -->|Yes| UPD[Update triggers]
-        TRIG -->|No| FORB
-        UPD --> FORB[Forbidden actions]
-        FORB --> XREF[Cross-reference rules]
-    end
-
-    XREF --> P5
-
-    subgraph P5[Phase 5: Review & Confirm]
-        SUM[Display config summary] --> OK{Approved?}
-        OK -->|Yes| MAP[Create doc map]
-        OK -->|Change| P1
-        MAP --> CLAUDE[Update CLAUDE.md governance]
-    end
-
-    CLAUDE --> READY([Ready to operate])
-
-    style P1 fill:#e8f4f8,stroke:#2196F3
-    style P2 fill:#f3e8f4,stroke:#9C27B0
-    style P3 fill:#e8f4e8,stroke:#4CAF50
-    style P4 fill:#fef8e8,stroke:#FF9800
-    style P5 fill:#fde8e8,stroke:#f44336
-```
-
-### doc-maintainer Content Type + Operation Matrix
-
-```mermaid
-flowchart LR
-    subgraph ContentType[Content Type]
-        STD[Standard Docs]
-        WIKI[Wiki]
-    end
-
-    subgraph Operations[Operations]
-        AUD[Audit]
-        ACT[Active]
-        BOOT[Bootstrap]
-    end
-
-    STD --> SA[Standard + Audit\nFull report with\nversion log compliance]
-    STD --> SM[Standard + Active\nDirect updates with\nversion tracking]
-    STD --> SB[Standard + Bootstrap\nScaffold with\nversion templates]
-
-    WIKI --> WA[Wiki + Audit\nReport with link integrity,\nfrontmatter & nav checks]
-    WIKI --> WM[Wiki + Active\nContent updates,\nno version logs]
-    WIKI --> WB[Wiki + Bootstrap\nScaffold wiki structure\nwith frontmatter]
-
-    style ContentType fill:#e8f4f8,stroke:#2196F3
-    style Operations fill:#f3e8f4,stroke:#9C27B0
-    style SA fill:#fff,stroke:#666
-    style SM fill:#fff,stroke:#666
-    style SB fill:#fff,stroke:#666
-    style WA fill:#fff,stroke:#666
-    style WM fill:#fff,stroke:#666
-    style WB fill:#fff,stroke:#666
-```
-
-### Operating Modes
-
-doc-maintainer uses a two-axis model: **content type** (Standard or Wiki) combined with an **operation** (Audit, Active, or Bootstrap). The active operation handles several workflows including update requests, proactive monitoring, consistency audits, and temporal entries. See [agent.md](doc-maintainer/agents/agent.md) for full details.
+Any operation works with either content type. See [agent.md](doc-maintainer/agents/agent.md) for full details.
 
 **Quick usage:**
 
 ```bash
-# Standard + audit
+# Audit your software docs
 Use doc-maintainer to audit my documentation
 
-# Standard + active maintenance
+# Active maintenance
 Use doc-maintainer in active mode to update the API docs
 
-# Wiki + active (entire repo)
-Use doc-maintainer on this repository with wiki content type
+# Bootstrap a new project
+Use doc-maintainer to bootstrap documentation for this project
 
-# Wiki + active (scoped to folder)
-Use doc-maintainer with wiki content type, scoped to the wiki/ folder
+# Audit wiki content (scoped to folder)
+Use doc-maintainer to audit the wiki/ folder as wiki content
 
-# Wiki + audit
-Use doc-maintainer to audit my wiki documentation
+# Active maintenance on wiki
+Use doc-maintainer in active mode on wiki content in docs/knowledge-base/
 ```
 
 ## Plugin Structure
