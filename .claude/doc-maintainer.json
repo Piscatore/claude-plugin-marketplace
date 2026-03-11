@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0.0",
+  "agentVersion": "1.13.0",
+  "contentType": "software-dev-docs",
+  "operation": "active",
+  "scope": null,
+  "versioning": {
+    "enabled": true,
+    "documentTypes": ["agent specs", "shared principles"],
+    "excludes": ["README", "CLAUDE.md", "drafts", "featuresuggestions.md"]
+  },
+  "style": {
+    "tone": "semi-formal, technical but approachable",
+    "headingHierarchy": "strict (H1 > H2 > H3)",
+    "fileNaming": "kebab-case for directories, UPPERCASE for root docs (CLAUDE.md, README.md), lowercase for nested docs (agent.md)",
+    "tables": "used for structured comparisons",
+    "versionFormat": "footer block with Version, Last Updated, Compatible with"
+  },
+  "updateTriggers": ["public-api", "config", "dependencies", "new-features", "shared-principles-changes"],
+  "forbiddenPaths": ["featuresuggestions.md"],
+  "forbiddenActions": [
+    "Modifying Version footer blocks (managed by versioning rules in CLAUDE.md)",
+    "Modifying existing changelog entries in shared/documentation-principles.md (temporal, append-only)"
+  ],
+  "crossRefFormat": "relative-markdown-links for navigation, backtick-paths for 'go read this' references",
+  "authoritativeSources": [
+    "shared/documentation-principles.md (single source of truth for governance principles)",
+    "plugin.json files (source of truth for version numbers)",
+    "Claude Code plugin documentation (external, Anthropic-published)"
+  ],
+  "auditReportPath": "docs/DOCUMENTATION_AUDIT.md",
+  "wiki": null
+}

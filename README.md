@@ -149,12 +149,34 @@ Task(
 ```
 claude-plugin-marketplace/
 ├── .claude-plugin/
-│   └── marketplace.json       # Marketplace registry (required)
+│   └── marketplace.json          # Marketplace registry (required)
+├── .github/
+│   ├── actions/
+│   │   └── claude-review/
+│   │       └── action.yml        # Shared composite action for PR reviews
+│   └── workflows/
+│       ├── code-review.yml       # General code review (manual trigger)
+│       └── doc-review.yml        # Documentation compliance review (manual trigger)
 ├── doc-maintainer/
-│   ├── plugin.json            # Plugin metadata
+│   ├── plugin.json               # Plugin metadata
 │   └── agents/
-│       └── doc-maintainer.md  # Agent specification (EDIT HERE)
-└── README.md
+│       └── agent.md              # Agent specification
+├── doc-pr-reviewer/
+│   ├── plugin.json               # Plugin metadata
+│   └── agents/
+│       └── doc-pr-reviewer.md    # Agent specification
+├── shared/
+│   └── documentation-principles.md  # Shared governance principles
+├── docs/
+│   ├── ARCHITECTURE.md           # Architecture and dependency model
+│   ├── plugin-development-guide.md  # Extended guide for plugin authors
+│   └── adr/                      # Architecture Decision Records
+├── CHANGELOG.md                  # Project-wide changelog
+├── CLAUDE.md                     # Development instructions and versioning rules
+├── CONTRIBUTING.md               # Contributor guide
+├── LICENSE                       # MIT license
+├── README.md                     # This file
+└── SECURITY.md                   # Security policy
 ```
 
 ## Plugin Development Workflow

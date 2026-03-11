@@ -1,0 +1,120 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+Version numbers follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+For per-component version history, see the Version section in each agent spec:
+- [doc-maintainer](doc-maintainer/agents/agent.md)
+- [doc-pr-reviewer](doc-pr-reviewer/agents/doc-pr-reviewer.md)
+- [shared principles](shared/documentation-principles.md)
+
+---
+
+## [Unreleased]
+
+## 2026-03-11
+
+### doc-maintainer v1.13.0
+- Fixed five real-world usage issues discovered during live onboarding sessions
+- Improved config file handling and session resume behavior
+
+### doc-maintainer v1.12.0
+- Added persistent configuration file (`.claude/doc-maintainer.json`)
+- Session resume without re-interviewing
+- Re-onboarding workflow with "keep current" defaults
+
+### doc-maintainer v1.11.0
+- Enhanced UX with structured interaction formatting (radio buttons, checkboxes, confirmations)
+- Added progress and transparency reporting during long operations
+- Added tiered template suggestions for bootstrap mode
+- Added delegated interview mode for subagent invocation
+
+## 2026-03-10
+
+### doc-maintainer v1.10.0
+- Restructured architecture into content type x operation matrix
+- "Wiki" changed from independent mode to content type modifier
+- Added interview-mode onboarding dialogue (Phase 1-5 structured interview)
+- Added configuration change interview workflow
+- Added Mermaid flowcharts to README for onboarding and mode matrix
+
+### Infrastructure
+- Disabled automatic CI PR reviews (switched to `workflow_dispatch`)
+- Refactored workflow duplication into shared composite action (`.github/actions/claude-review/`)
+- Added HTTP status code checking to API calls
+- Increased max_tokens to 24K for extended thinking headroom
+- Added anthropic-beta header for extended thinking support
+- Optimized plugins for Opus/Sonnet 4.6 model support
+- Addressed PR review feedback: shell safety, DRY, and robustness
+
+## 2025-12-07
+
+### doc-maintainer v1.8.0
+- Updated for Version Log Compliance
+
+### Infrastructure
+- Added fallback when GitHub Actions cannot approve PRs
+- Fixed PR review logic and addressed security feedback
+- Added proper GitHub PR reviews for code and documentation
+
+## 2025-12-01
+
+### Infrastructure
+- Made Claude model configurable in doc-review workflow
+- Added GitHub Action for automated doc-pr-reviewer
+
+## 2025-11-30
+
+### shared/documentation-principles v2.0.0
+- Added Handling Uncertainty with three-layer knowledge acquisition
+- Added Industry Standards Reference tables
+- Added Documentation Gap Analysis workflow
+- Consolidated shared logic from both agent specs
+
+### doc-maintainer v1.7.0
+- Unified three-layer knowledge acquisition into Handling Uncertainty
+
+### doc-maintainer v1.6.0
+- Added Bootstrap Mode for undocumented projects
+
+### doc-maintainer v1.5.0
+- Added tiered uncertainty handling to reduce unnecessary user questions
+
+### doc-pr-reviewer v1.1.0 + shared/documentation-principles v1.0.0
+- Added doc-pr-reviewer plugin (PR documentation compliance reviewer)
+- Extracted shared documentation principles into `shared/documentation-principles.md`
+
+### doc-maintainer v1.3.1
+- Added Claude Code permission compatibility section
+
+### doc-maintainer v1.3.0
+- Added CLAUDE.md governance management
+
+### doc-maintainer v1.2.1
+- Improved clarity and added Musts section
+
+### Infrastructure
+- Added CLAUDE.md with versioning governance for shared dependencies
+- Added PR-based development workflow
+- Fixed README.md to align with PR-based workflow
+
+## 2025-11-29
+
+### doc-maintainer v1.2.0
+- Replaced index-only mode with audit mode
+
+### Infrastructure
+- Renamed marketplace to piscatore-agent-plugins
+- Fixed plugin.json manifest validation errors
+- Fixed plugin path structure for Claude Code compatibility
+- Consolidated to single source of truth for plugins
+
+## 2025-11-28
+
+### Initial Release
+- doc-maintainer v1.0.0 -- Documentation auditing and maintenance agent
+- Marketplace infrastructure (marketplace.json, plugin.json)
+- README with installation instructions
+- Native Claude Code marketplace format

@@ -97,3 +97,13 @@ Use this when making changes:
 | 2.0.0   | 1.13.0         | 1.1.0           |
 
 Update this table when versions change.
+
+## Documentation Governance
+
+Documentation is managed by doc-maintainer (active mode).
+Configuration: `.claude/doc-maintainer.json`
+
+- After code changes, notify doc-maintainer to assess documentation impact
+- Run `doc-maintainer audit` for periodic checks
+- See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the shared dependency model
+- See [CONTRIBUTING.md](CONTRIBUTING.md) for contributor documentation requirements
