@@ -9,11 +9,21 @@ For per-component version history, see the Version section in each agent spec:
 - [doc-maintainer](doc-maintainer/agents/agent.md)
 - [doc-pr-reviewer](doc-pr-reviewer/agents/doc-pr-reviewer.md)
 - [product-advisor](product-advisor/agents/product-advisor.md)
+- [workflow-guard](workflow-guard/agents/workflow-guard.md)
 - [shared principles](shared/documentation-principles.md)
 
 ---
 
 ## [Unreleased]
+
+## 2026-03-12
+
+### workflow-guard v1.0.0 (New Plugin)
+- Workflow enforcement agent for hook-based guard management
+- PR creation gate template (bash-only, zero API cost)
+- `/guard` skill with setup, list, and remove actions
+- Safe settings.json merge workflow
+- Hook Patterns section added to plugin development guide
 
 ## 2026-03-11 (4)
 

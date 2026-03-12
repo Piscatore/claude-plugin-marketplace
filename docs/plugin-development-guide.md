@@ -121,6 +121,126 @@ Read and internalize that file before proceeding.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for how the shared dependency model works.
 
+## Hook Patterns
+
+Claude Code supports lifecycle hooks — shell scripts that run automatically when the agent uses tools. Hooks are a powerful way to enforce workflow policies without consuming API tokens.
+
+### How Hooks Work
+
+Hooks are configured in `.claude/settings.json` under the `hooks` key. Each hook targets a lifecycle event and a tool matcher:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/your-guard.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Lifecycle events:**
+
+| Event | When It Fires |
+|-------|---------------|
+| `PreToolUse` | Before a tool call executes |
+| `PostToolUse` | After a tool call completes |
+| `Stop` | When the agent finishes its turn |
+
+**Matchers** are tool name patterns. Use `"Bash"` to match Bash tool calls, `"Write"` for file writes, etc.
+
+### Hook Script Protocol
+
+Hook scripts receive tool input as JSON on stdin. They can output JSON to influence behavior:
+
+```json
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "ask",
+    "permissionDecisionReason": "Message shown to the user."
+  }
+}
+```
+
+**Permission decisions:** `"allow"` (silently permit), `"ask"` (prompt user for confirmation), `"deny"` (block with explanation).
+
+Scripts must always `exit 0`. Empty stdout means "proceed normally."
+
+### Shipping Hook Templates with Plugins
+
+If your plugin includes guard scripts, place them in a `templates/` directory:
+
+```
+your-plugin/
+├── plugin.json
+├── agents/
+│   └── your-agent.md
+└── templates/
+    └── your-guard/
+        ├── guard.sh       # The hook script
+        └── README.md      # What it does, how to customize
+```
+
+Your agent spec should include a workflow for installing templates: read the script, show it to the user, confirm the installation path, write the script, and merge the hook config into `settings.json`.
+
+### Script Authoring Constraints
+
+- **Bash-only.** Do not require `jq`, `python`, or other dependencies. Use `grep -o` and `sed` for JSON field extraction.
+- **Always exit 0.** Non-zero exits are treated as hook failures.
+- **Filter internally.** A hook script may be triggered for many commands. Check the input and only act on relevant ones; output nothing for irrelevant calls.
+- **Relative paths.** Script paths in `settings.json` should be relative to the project root.
+- **No side effects.** Guard scripts should inspect and gate, not modify files or call APIs.
+
+### Example: PR Creation Gate
+
+This script intercepts `gh pr create` and asks the user for confirmation:
+
+```bash
+#!/bin/bash
+input=$(cat)
+command=$(echo "$input" | grep -o '"command":"[^"]*"' | head -1 | sed 's/"command":"//;s/"$//')
+
+if echo "$command" | grep -q "gh pr create"; then
+  cat <<'JSON'
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "ask",
+    "permissionDecisionReason": "PR creation detected. Have you completed your pre-PR checklist?"
+  }
+}
+JSON
+  exit 0
+fi
+exit 0
+```
+
+Register it in `settings.json`:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": ".claude/hooks/pre-pr-check.sh" }]
+      }
+    ]
+  }
+}
+```
+
+For guided guard setup, see the [workflow-guard](../workflow-guard/) plugin and its `/guard` skill.
+
 ## Registering Your Plugin
 
 After creating your plugin files, register it in `.claude-plugin/marketplace.json`:

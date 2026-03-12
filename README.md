@@ -37,6 +37,7 @@ This connects your Claude Code instance to the marketplace.
 | doc-maintainer | Documentation Maintainer | 1.13.0 | productivity | Specialized agent for documentation auditing, maintenance, and bootstrapping. Supports software dev docs and wiki content types with audit, active, and bootstrap operations. Persistent config file. |
 | doc-pr-reviewer | Documentation PR Reviewer | 1.2.0 | productivity | Reviews Pull Requests for documentation compliance. Config-aware with CI automation. Inherits conventions from doc-maintainer. Supports advisory, strict, auto-fix, and CI modes. |
 | product-advisor | Product Advisor | 1.0.0 | productivity | Product strategist agent for use case discovery, value prop analysis, feature prioritization, trade-offs, and risk mapping. Includes /brainstorm, /product-review, /use-cases, and /trade-offs skills. |
+| workflow-guard | Workflow Guard | 1.0.0 | devops | Workflow enforcement agent for managing PreToolUse/PostToolUse hook guards. Ships with a PR creation gate template. Use /guard to set up, list, or remove guards. |
 
 Use `/plugin show <id>` for detailed information about each plugin.
 
@@ -97,6 +98,37 @@ product-advisor shifts Claude from engineer mode to product strategist mode. It 
 ```
 
 **Configuration:** Optional. Add a `productAdvisor` section to `.claude/doc-maintainer.json`, or create `.claude/product-advisor.json`. Works with sensible defaults if no config exists. See [product-advisor.md](product-advisor/agents/product-advisor.md) for details.
+
+### workflow-guard: How It Works
+
+workflow-guard packages the hook-based workflow enforcement pattern as a reusable plugin. It helps users create, install, and manage Claude Code hook guards — shell scripts that run automatically when Claude attempts to use a tool.
+
+**Key concept:** Guards are PreToolUse/PostToolUse hooks registered in `.claude/settings.json`. They intercept tool calls and can allow, ask for confirmation, or deny them. Guards run as local bash scripts at zero API cost.
+
+**Skill:** One user-invocable skill for guard management:
+
+- `/guard` — Set up, list, or remove workflow guards
+
+**Templates:** Pre-built guard scripts with documentation:
+
+| Template | Description |
+|----------|-------------|
+| `pr-gate` | Gates PR creation behind a confirmation prompt. Reminds user to complete pre-PR checks. |
+
+**Quick usage:**
+
+```bash
+# List active guards
+/guard
+
+# Install a guard from template
+/guard setup
+
+# Remove a guard
+/guard remove
+```
+
+See [workflow-guard.md](workflow-guard/agents/workflow-guard.md) for the full agent spec, including the hook protocol reference and template authoring guide.
 
 ## Plugin Structure
 
@@ -185,6 +217,7 @@ Key directories:
 | `doc-maintainer/` | Documentation maintenance agent (plugin.json + agent spec) |
 | `doc-pr-reviewer/` | PR review agent (plugin.json + agent spec) |
 | `product-advisor/` | Product strategist agent (plugin.json + agent spec + skills) |
+| `workflow-guard/` | Workflow enforcement agent (plugin.json + agent spec + skill + templates) |
 | `shared/` | Shared governance principles used by doc-maintainer and doc-pr-reviewer |
 | `docs/` | Architecture docs, plugin development guide, ADRs |
 | `.claude-plugin/` | Marketplace registry |
@@ -208,5 +241,5 @@ See `CLAUDE.md` for detailed workflow and branch naming conventions.
 
 ## Version
 
-Marketplace Version: 1.1.0
-Last Updated: 2026-03-11
+Marketplace Version: 1.2.0
+Last Updated: 2026-03-12
