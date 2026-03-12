@@ -5,6 +5,6 @@
   "author": {
     "name": "AgentPlugins"
   },
-  "agents": ["./agents/"],
+  "agents": ["./agents/workflow-guard.md"],
   "skills": ["./skills/"]
 }
