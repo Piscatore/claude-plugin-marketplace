@@ -45,6 +45,17 @@ claude-plugin-marketplace/
 │       │   └── SKILL.md          # /use-cases skill
 │       └── trade-offs/
 │           └── SKILL.md          # /trade-offs skill
+├── workflow-guard/
+│   ├── plugin.json               # Plugin metadata and version
+│   ├── agents/
+│   │   └── workflow-guard.md     # Agent specification
+│   ├── skills/
+│   │   └── guard/
+│   │       └── SKILL.md          # /guard skill
+│   └── templates/
+│       └── pr-gate/
+│           ├── guard.sh          # PR creation gate hook script
+│           └── README.md         # Template documentation
 ├── shared/
 │   └── documentation-principles.md  # Shared governance principles
 ├── docs/
@@ -89,6 +100,18 @@ product-advisor (v1.0.0)
     └── no dependency on shared/documentation-principles.md
 ```
 
+### workflow-guard (independent)
+
+`workflow-guard` does not depend on `shared/documentation-principles.md`. It is a workflow enforcement agent that manages Claude Code hook guards. It ships with pre-built guard templates and a `/guard` skill for interactive setup. No dependencies on other plugins.
+
+```
+workflow-guard (v1.0.0)
+    │
+    ├── templates/pr-gate/    (ships with PR creation gate)
+    ├── /guard skill          (setup, list, remove guards)
+    └── no dependency on shared/ or other plugins
+```
+
 ### Why shared principles?
 
 Both `doc-maintainer` and `doc-pr-reviewer` need to agree on what "good documentation" means. If each agent defined its own rules, they could drift apart -- doc-maintainer might enforce one standard while doc-pr-reviewer checks for a different one.
@@ -103,6 +126,7 @@ By extracting shared logic into `shared/documentation-principles.md`, both agent
 | `doc-maintainer/agents/agent.md` | Initialization interview, operating modes, versioning logic, wiki content rules, configuration persistence, interaction formatting |
 | `doc-pr-reviewer/agents/doc-pr-reviewer.md` | PR review workflow, issue severity, GitHub integration, advisory/strict/auto-fix/CI modes, config resolution chain, convention inheritance |
 | `product-advisor/agents/product-advisor.md` | Product strategy, use case discovery, trade-off analysis, brainstorming facilitation, challenge mode, scratchpad/artifact output handling |
+| `workflow-guard/agents/workflow-guard.md` | Hook guard management, template-based setup, settings.json merging, guard listing and removal |
 
 ### Configuration sharing
 
@@ -161,6 +185,8 @@ Both workflows are currently set to `workflow_dispatch` (manual trigger) rather 
 ## Hook-Based Automation
 
 A PreToolUse hook in `.claude/settings.json` gates PR creation. When Claude attempts to run `gh pr create` via the Bash tool, the hook script (`.claude/hooks/pre-pr-check.sh`) intercepts the call and prompts the user to confirm that the Pre-PR Validation Checklist has been completed. This enforces the validation workflow defined in `CLAUDE.md` at the tooling level.
+
+The `workflow-guard` plugin generalizes this pattern into a reusable tool. It ships a PR creation gate as a template and provides the `/guard` skill for installing, listing, and removing guards in any project. See the [plugin development guide](plugin-development-guide.md#hook-patterns) for authoring guidance.
 
 ## Plugin Discovery
 

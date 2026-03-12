@@ -5,7 +5,7 @@
     "email": "plugins@example.com"
   },
   "metadata": {
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "Curated collection of specialized agent plugins for Claude Code"
   },
   "plugins": [
@@ -43,6 +43,18 @@
         "email": "plugins@example.com"
       },
       "keywords": ["product", "strategy", "brainstorm", "trade-offs", "use-cases", "prioritization", "decision-making"],
+      "strict": false
+    },
+    {
+      "name": "workflow-guard",
+      "source": "./workflow-guard",
+      "description": "Workflow enforcement agent for managing PreToolUse/PostToolUse hook guards. Ships with a PR creation gate template. Use /guard to set up, list, or remove guards.",
+      "version": "1.0.0",
+      "author": {
+        "name": "AgentPlugins",
+        "email": "plugins@example.com"
+      },
+      "keywords": ["workflow", "hooks", "guards", "enforcement", "devops", "pr-gate"],
       "strict": false
     }
   ]
