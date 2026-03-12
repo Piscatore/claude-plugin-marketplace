@@ -55,6 +55,7 @@ Your `agents/your-agent.md` file is the core of the plugin. It defines the agent
 - [doc-maintainer/agents/agent.md](doc-maintainer/agents/agent.md) -- comprehensive example with multiple modes
 - [doc-pr-reviewer/agents/doc-pr-reviewer.md](doc-pr-reviewer/agents/doc-pr-reviewer.md) -- simpler example focused on a single workflow
 - [product-advisor/agents/product-advisor.md](product-advisor/agents/product-advisor.md) -- example with skills directory pattern
+- [workflow-guard/agents/workflow-guard.md](workflow-guard/agents/workflow-guard.md) -- example with templates directory pattern
 
 ### 4. Register in the marketplace
 
