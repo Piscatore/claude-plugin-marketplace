@@ -13,7 +13,7 @@
       "name": "doc-maintainer",
       "source": "./doc-maintainer",
       "description": "Specialized agent for documentation auditing, maintenance, and bootstrapping. Supports software dev docs and wiki content types with audit, active, and bootstrap operations.",
-      "version": "1.13.0",
+      "version": "1.14.0",
       "author": {
         "name": "AgentPlugins",
         "email": "plugins@example.com"
@@ -25,7 +25,7 @@
       "name": "doc-pr-reviewer",
       "source": "./doc-pr-reviewer",
       "description": "Reviews Pull Requests for documentation compliance. Config-aware with CI automation. Inherits conventions from doc-maintainer. Supports advisory, strict, auto-fix, and CI modes.",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "author": {
         "name": "AgentPlugins",
         "email": "plugins@example.com"
@@ -37,7 +37,7 @@
       "name": "product-advisor",
       "source": "./product-advisor",
       "description": "Product strategist agent for use case discovery, value prop analysis, feature prioritization, trade-offs, and risk mapping. Includes /brainstorm, /product-review, /use-cases, and /trade-offs skills.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "AgentPlugins",
         "email": "plugins@example.com"
@@ -49,7 +49,7 @@
       "name": "workflow-guard",
       "source": "./workflow-guard",
       "description": "Workflow enforcement agent for managing PreToolUse/PostToolUse hook guards. Ships with a PR creation gate template. Use /guard to set up, list, or remove guards.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "AgentPlugins",
         "email": "plugins@example.com"
@@ -61,7 +61,7 @@
       "name": "rpi-workflow",
       "source": "./rpi-workflow",
       "description": "Research-Plan-Implement workflow framework for structured software development. Provides 8 slash commands (/0_define_work through /7_complete_work) that guide work from definition through PR merge. Configurable per-project via .claude/rpi-config.json.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "AgentPlugins",
         "email": "plugins@example.com"
@@ -73,7 +73,7 @@
       "name": "component-advisor",
       "source": "./component-advisor",
       "description": "External component and library advisor for software design phases. Discovers, evaluates, and recommends third-party packages (NuGet, npm, pip, cargo, etc.) that fit the project's architecture and existing dependency graph.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "AgentPlugins",
         "email": "plugins@example.com"

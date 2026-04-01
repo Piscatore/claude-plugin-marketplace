@@ -1,6 +1,6 @@
 {
   "name": "component-advisor",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "External component and library advisor for software design phases. Discovers, evaluates, and recommends third-party packages (NuGet, npm, pip, cargo, etc.) that fit the project's architecture and existing dependency graph. Includes /find-component, /audit-dependencies, /compare-components, and /check-compatibility skills.",
   "author": {
     "name": "AgentPlugins"

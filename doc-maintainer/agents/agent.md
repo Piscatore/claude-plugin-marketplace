@@ -778,7 +778,7 @@ See `shared/cross-plugin-registry.md` for the full integration matrix.
 
 ## Version
 
-Agent Version: 1.13.0
-Last Updated: 2026-03-11
+Agent Version: 1.14.0
+Last Updated: 2026-04-01
 Compatible with: Claude Code (any version)
 Requires: shared/documentation-principles.md v2.0.0+

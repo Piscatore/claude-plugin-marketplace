@@ -293,7 +293,7 @@ See `shared/cross-plugin-registry.md` for the full integration matrix.
 
 ## Version
 
-Agent Version: 1.0.0
-Last Updated: 2026-03-11
+Agent Version: 1.1.0
+Last Updated: 2026-04-01
 Compatible with: Claude Code (any version)
-Optional integration: doc-maintainer v1.13.0+, doc-pr-reviewer v1.2.0+
+Optional integration: doc-maintainer v1.14.0+, doc-pr-reviewer v1.3.0+, component-advisor v1.1.0+, rpi-workflow v1.1.0+

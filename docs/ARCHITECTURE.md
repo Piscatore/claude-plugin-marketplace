@@ -57,7 +57,8 @@ claude-plugin-marketplace/
 │           ├── guard.sh          # PR creation gate hook script
 │           └── README.md         # Template documentation
 ├── shared/
-│   └── documentation-principles.md  # Shared governance principles
+│   ├── documentation-principles.md  # Shared governance principles
+│   └── cross-plugin-registry.md     # Cross-plugin discovery & delegation registry
 ├── docs/
 │   ├── ARCHITECTURE.md           # This file
 │   ├── plugin-development-guide.md  # Extended guide for plugin authors
@@ -85,31 +86,49 @@ shared/documentation-principles.md (v2.0.0)
    │                  │
    ▼                  ▼
 doc-maintainer     doc-pr-reviewer
-  (v1.13.0)          (v1.2.0)
+  (v1.14.0)          (v1.3.0)
 ```
 
-### product-advisor (independent)
+### Cross-Plugin Registry
 
-`product-advisor` does not depend on `shared/documentation-principles.md`. It is a product strategy agent, not a documentation governance agent. It optionally reads `doc-maintainer.json` for configuration and can delegate documentation tasks to doc-maintainer when installed, but has no required dependencies.
+All six plugins reference `shared/cross-plugin-registry.md` for ecosystem awareness. This file defines the plugin inventory, a standardized discovery protocol, the ADR-003 delegation pattern, and an integration matrix showing which plugins delegate to which.
 
 ```
-product-advisor (v1.0.0)
+shared/cross-plugin-registry.md (v1.0.0)
+        │
+        │  referenced by (all 6 plugins)
+        │
+   ┌────┼─────┬─────┬─────┬─────┬─────┐
+   ▼    ▼     ▼     ▼     ▼     ▼     ▼
+ doc-m doc-pr prod  comp  rpi   wfg
+```
+
+Unlike `documentation-principles.md` which carries behavioral rules, the registry is a lightweight lookup table. Plugins remain self-sufficient — the registry enables awareness, not dependency.
+
+### product-advisor
+
+`product-advisor` does not depend on `shared/documentation-principles.md`. It is a product strategy agent, not a documentation governance agent. It optionally reads `doc-maintainer.json` for configuration and can delegate documentation tasks to doc-maintainer when installed. It also delegates to component-advisor and rpi-workflow when appropriate.
+
+```
+product-advisor (v1.1.0)
     │
     ├── optionally reads .claude/doc-maintainer.json (productAdvisor section)
     ├── optionally delegates doc tasks to doc-maintainer
+    ├── optionally delegates tech choices to component-advisor
+    ├── optionally delegates work items to rpi-workflow
     └── no dependency on shared/documentation-principles.md
 ```
 
-### workflow-guard (independent)
+### workflow-guard
 
-`workflow-guard` does not depend on `shared/documentation-principles.md`. It is a workflow enforcement agent that manages Claude Code hook guards. It ships with pre-built guard templates and a `/guard` skill for interactive setup. No dependencies on other plugins.
+`workflow-guard` does not depend on `shared/documentation-principles.md`. It is a workflow enforcement agent that manages Claude Code hook guards. It ships with pre-built guard templates and a `/guard` skill for interactive setup. It is aware of rpi-workflow phases for guard alignment.
 
 ```
-workflow-guard (v1.0.0)
+workflow-guard (v1.1.0)
     │
     ├── templates/pr-gate/    (ships with PR creation gate)
     ├── /guard skill          (setup, list, remove guards)
-    └── no dependency on shared/ or other plugins
+    └── aware of rpi-workflow phases for guard enforcement
 ```
 
 ### Why shared principles?
@@ -123,6 +142,7 @@ By extracting shared logic into `shared/documentation-principles.md`, both agent
 | Location | Content |
 |----------|---------|
 | `shared/documentation-principles.md` | Core principles, document classification, compliance checklist, handling uncertainty, industry standards, gap analysis workflow |
+| `shared/cross-plugin-registry.md` | Plugin inventory, discovery protocol, delegation protocol (ADR-003), integration matrix |
 | `doc-maintainer/agents/agent.md` | Initialization interview, operating modes, versioning logic, wiki content rules, configuration persistence, interaction formatting |
 | `doc-pr-reviewer/agents/doc-pr-reviewer.md` | PR review workflow, issue severity, GitHub integration, advisory/strict/auto-fix/CI modes, config resolution chain, convention inheritance |
 | `product-advisor/agents/product-advisor.md` | Product strategy, use case discovery, trade-off analysis, brainstorming facilitation, challenge mode, scratchpad/artifact output handling |
