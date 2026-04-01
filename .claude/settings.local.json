@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh auth switch --user Mikael-Avient)",
+      "Bash(gh run list --limit 4 --json databaseId,name,status,conclusion --jq '.[] | \"\"\\\\\\(.databaseId\\) \\\\\\(.name\\) \\\\\\(.status\\) \\\\\\(.conclusion\\)\"\"')",
+      "Bash(gh api repos/Piscatore/claude-plugin-marketplace/pulls/5/reviews --jq '[.[] | select\\(.state == \"\"CHANGES_REQUESTED\"\" or .state == \"\"APPROVED\"\"\\) | {id: .id, state: .state, user: .user.login}]')",
+      "WebSearch",
+      "Bash(claude plugin:*)",
+      "Read(//c/src/**)",
+      "Bash(find . -type f -name *skill* -o -name *command* -o -name *hook*)",
+      "Bash(cd \"/c/src/Life Projects/AgentPlugins/claude-plugin-marketplace\" && gh pr create --title \"Add product-advisor plugin \\(v1.0.0\\)\" --body \"$\\(cat <<'EOF'\n## Summary\n\n- **New plugin**: `product-advisor` v1.0.0 — a product strategist agent for Claude Code\n- **4 skills**: `/brainstorm`, `/product-review`, `/use-cases`, `/trade-offs` for structured product thinking\n- **Agent**: Conversational product advisor with structured frameworks \\(RICE, MoSCoW, Jobs-to-be-Done, etc.\\)\n- **Docs**: Updated README, ARCHITECTURE.md, CHANGELOG, CLAUDE.md, plugin-development-guide, and marketplace listing\n\n## What's included\n\n| Component | Description |\n|-----------|-------------|\n| `product-advisor/plugin.json` | Plugin manifest |\n| `product-advisor/agents/product-advisor.md` | Agent definition with product strategy frameworks |\n| `product-advisor/skills/brainstorm/SKILL.md` | Structured brainstorming sessions |\n| `product-advisor/skills/product-review/SKILL.md` | Multi-dimensional product reviews |\n| `product-advisor/skills/use-cases/SKILL.md` | Use case discovery and mapping |\n| `product-advisor/skills/trade-offs/SKILL.md` | Feature trade-off analysis |\n\n## Test plan\n\n- [ ] Install plugin locally and verify all 4 skills trigger correctly\n- [ ] Test agent invocation with a sample product question\n- [ ] Verify marketplace.json is valid JSON and lists the new plugin\n- [ ] Confirm documentation links and version table are consistent\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\nEOF\n\\)\")",
+      "Skill(product-advisor:product-review)",
+      "Skill(product-advisor:trade-offs)",
+      "Bash(cd \"/c/src/Life Projects/AgentPlugins/claude-plugin-marketplace\" && mkdir -p workflow-guard/agents workflow-guard/skills/guard workflow-guard/templates/pr-gate)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
