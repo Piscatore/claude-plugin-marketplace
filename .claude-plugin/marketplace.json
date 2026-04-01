@@ -5,7 +5,7 @@
     "email": "plugins@example.com"
   },
   "metadata": {
-    "version": "1.2.0",
+    "version": "1.3.0",
     "description": "Curated collection of specialized agent plugins for Claude Code"
   },
   "plugins": [
@@ -55,6 +55,18 @@
         "email": "plugins@example.com"
       },
       "keywords": ["workflow", "hooks", "guards", "enforcement", "devops", "pr-gate"],
+      "strict": false
+    },
+    {
+      "name": "rpi-workflow",
+      "source": "./rpi-workflow",
+      "description": "Research-Plan-Implement workflow framework for structured software development. Provides 8 slash commands (/0_define_work through /7_complete_work) that guide work from definition through PR merge. Configurable per-project via .claude/rpi-config.json.",
+      "version": "1.0.0",
+      "author": {
+        "name": "AgentPlugins",
+        "email": "plugins@example.com"
+      },
+      "keywords": ["workflow", "planning", "implementation", "git", "pr", "research", "structured-development"],
       "strict": false
     }
   ]

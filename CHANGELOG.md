@@ -10,11 +10,29 @@ For per-component version history, see the Version section in each agent spec:
 - [doc-pr-reviewer](doc-pr-reviewer/agents/doc-pr-reviewer.md)
 - [product-advisor](product-advisor/agents/product-advisor.md)
 - [workflow-guard](workflow-guard/agents/workflow-guard.md)
+- [rpi-workflow](rpi-workflow/agents/rpi-workflow.md)
 - [shared principles](shared/documentation-principles.md)
 
 ---
 
 ## [Unreleased]
+
+## 2026-04-01
+
+### rpi-workflow v1.0.0 (New Plugin)
+- Research-Plan-Implement workflow framework for structured software development
+- 8 slash commands covering the full development lifecycle (/0-define-work through /7-complete-work)
+- Flexible workflow paths: large (all steps), medium (skip research), small (define + implement + complete)
+- Project-specific configuration via `.claude/rpi-config.json`
+- Auto-detection of build/test commands when no config exists
+- Parallel research agents for deep codebase analysis
+- Clarification gates in research and planning phases
+- Auto-commit at implementation phase checkpoints
+- Session save/resume for mid-work pauses
+- PR creation with acceptance criteria verification
+
+### Marketplace v1.3.0
+- Added rpi-workflow plugin to marketplace registry
 
 ## 2026-03-12
 
