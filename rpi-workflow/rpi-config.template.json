@@ -1,0 +1,75 @@
+{
+  "$schema": "Configuration for the RPI Workflow plugin. Place as .claude/rpi-config.json in your project root.",
+
+  "project": {
+    "name": "My Project",
+    "description": "Brief description of the project",
+    "buildCommand": "dotnet build",
+    "testCommand": "dotnet test",
+    "branchPrefix": "",
+    "workingDirs": {
+      "briefs": "thoughts/shared/work",
+      "research": "thoughts/shared/research",
+      "plans": "thoughts/shared/plans",
+      "sessions": "thoughts/shared/sessions"
+    }
+  },
+
+  "architecture": {
+    "layers": [
+      {
+        "name": "Core",
+        "path": "src/MyProject.Core",
+        "description": "Domain models and interfaces",
+        "dependsOn": []
+      },
+      {
+        "name": "Infrastructure",
+        "path": "src/MyProject.Infrastructure",
+        "description": "Data access, external services",
+        "dependsOn": ["Core"]
+      },
+      {
+        "name": "Api",
+        "path": "src/MyProject.Api",
+        "description": "HTTP API layer",
+        "dependsOn": ["Core", "Infrastructure"]
+      }
+    ],
+    "dependencyFlow": "Core → Infrastructure → Api",
+    "codePatterns": [
+      "Describe your project's established coding patterns here",
+      "e.g., 'Repositories use DbConnectionFactory + Dapper'",
+      "e.g., 'API endpoints use static class with MapGroup'"
+    ],
+    "styleRules": [
+      "Describe code style rules here",
+      "e.g., 'File-scoped namespaces'",
+      "e.g., 'CancellationToken on all async methods'"
+    ]
+  },
+
+  "validation": {
+    "structuralChecks": [
+      "Dependency order: changes respect the layer dependency flow",
+      "Interface-first: interfaces defined before implementations",
+      "DI registration: every new service has a registration step"
+    ],
+    "patternChecks": [
+      "Describe pattern-specific validation checks here",
+      "e.g., 'Repositories use DbConnectionFactory'",
+      "e.g., 'Type handlers registered in DapperConfig.Initialize()'"
+    ]
+  },
+
+  "research": {
+    "agents": [],
+    "subsystems": [
+      {
+        "name": "Models",
+        "description": "Domain models and types",
+        "path": "src/MyProject.Core/Models"
+      }
+    ]
+  }
+}

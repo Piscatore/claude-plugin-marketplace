@@ -56,6 +56,7 @@ This repository contains Claude Code plugins:
 - `doc-pr-reviewer` - PR review agent for documentation compliance
 - `product-advisor` - Product strategist agent for use case discovery, trade-offs, and feature prioritization
 - `workflow-guard` - Workflow enforcement agent for hook-based guard management
+- `rpi-workflow` - Research-Plan-Implement workflow framework for structured software development
 - `shared/documentation-principles.md` - Shared principles used by doc-maintainer and doc-pr-reviewer
 
 ## Shared Dependencies Architecture
@@ -112,9 +113,9 @@ Use this when making changes:
 
 ## Current Version Compatibility
 
-| shared/ | doc-maintainer | doc-pr-reviewer | product-advisor | workflow-guard |
-|---------|----------------|-----------------|-----------------|----------------|
-| 2.0.0   | 1.13.0         | 1.2.0           | 1.0.0           | 1.0.0          |
+| shared/ | doc-maintainer | doc-pr-reviewer | product-advisor | workflow-guard | rpi-workflow |
+|---------|----------------|-----------------|-----------------|----------------|--------------|
+| 2.0.0   | 1.13.0         | 1.2.0           | 1.0.0           | 1.0.0          | 1.0.0        |
 
 Update this table when versions change.
 

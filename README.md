@@ -38,6 +38,7 @@ This connects your Claude Code instance to the marketplace.
 | doc-pr-reviewer | Documentation PR Reviewer | 1.2.0 | productivity | Reviews Pull Requests for documentation compliance. Config-aware with CI automation. Inherits conventions from doc-maintainer. Supports advisory, strict, auto-fix, and CI modes. |
 | product-advisor | Product Advisor | 1.0.0 | productivity | Product strategist agent for use case discovery, value prop analysis, feature prioritization, trade-offs, and risk mapping. Includes /brainstorm, /product-review, /use-cases, and /trade-offs skills. |
 | workflow-guard | Workflow Guard | 1.0.0 | devops | Workflow enforcement agent for managing PreToolUse/PostToolUse hook guards. Ships with a PR creation gate template. Use /guard to set up, list, or remove guards. |
+| rpi-workflow | RPI Workflow | 1.0.0 | productivity | Research-Plan-Implement workflow framework for structured software development. Provides 8 slash commands (/0-define-work through /7-complete-work) that guide work from definition through PR merge. |
 
 Use `/plugin show <id>` for detailed information about each plugin.
 
@@ -130,6 +131,49 @@ workflow-guard packages the hook-based workflow enforcement pattern as a reusabl
 
 See [workflow-guard.md](workflow-guard/agents/workflow-guard.md) for the full agent spec, including the hook protocol reference and template authoring guide.
 
+### rpi-workflow: How It Works
+
+rpi-workflow provides a structured Research-Plan-Implement development lifecycle. It guides work from initial definition through PR merge using 8 sequential slash commands.
+
+**Skills:** Eight user-invocable skills for the full development lifecycle:
+
+- `/0-define-work` — Clarify requirements through dialogue, save a work brief, create a feature branch
+- `/1-research-codebase` — Deep codebase research with parallel agents and a clarification gate
+- `/2-create-plan` — Step-by-step implementation plan respecting architecture layers
+- `/3-validate-plan` — Validate plan against architecture rules, patterns, and completeness
+- `/4-implement-plan` — Execute plan with verification gates and auto-commits at checkpoints
+- `/5-save-progress` — Mid-work pause: commit, push, and save session state
+- `/6-resume-work` — Resume a saved session: restore context and continue implementation
+- `/7-complete-work` — Verify acceptance criteria, create PR, optionally merge
+
+Not every work item needs all steps:
+- **Large/unfamiliar**: 0 → 1 → 2 → 3 → 4 → 7
+- **Medium/familiar**: 0 → 2 → 4 → 7
+- **Small/trivial**: 0 → 4 → 7
+
+**Quick usage:**
+
+```bash
+# Start a new work item
+/0-define-work
+
+# Research the codebase for context
+/1-research-codebase
+
+# Create and validate an implementation plan
+/2-create-plan
+/3-validate-plan
+
+# Implement the plan
+/4-implement-plan
+
+# Save progress or complete
+/5-save-progress
+/7-complete-work
+```
+
+**Configuration:** Optional. Place a `rpi-config.json` in `.claude/` to define project structure, architecture layers, build/test commands, and validation rules. Works with auto-detected defaults if no config exists. See [rpi-workflow.md](rpi-workflow/agents/rpi-workflow.md) for details.
+
 ## Plugin Structure
 
 Each plugin is a markdown specification file that defines:
@@ -218,6 +262,7 @@ Key directories:
 | `doc-pr-reviewer/` | PR review agent (plugin.json + agent spec) |
 | `product-advisor/` | Product strategist agent (plugin.json + agent spec + skills) |
 | `workflow-guard/` | Workflow enforcement agent (plugin.json + agent spec + skill + templates) |
+| `rpi-workflow/` | RPI workflow agent (plugin.json + agent spec + 8 skills + config template) |
 | `shared/` | Shared governance principles used by doc-maintainer and doc-pr-reviewer |
 | `docs/` | Architecture docs, plugin development guide, ADRs |
 | `.claude-plugin/` | Marketplace registry |
@@ -241,5 +286,5 @@ See `CLAUDE.md` for detailed workflow and branch naming conventions.
 
 ## Version
 
-Marketplace Version: 1.2.0
-Last Updated: 2026-03-12
+Marketplace Version: 1.3.0
+Last Updated: 2026-04-01
