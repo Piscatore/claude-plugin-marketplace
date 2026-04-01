@@ -39,6 +39,7 @@ This connects your Claude Code instance to the marketplace.
 | product-advisor | Product Advisor | 1.0.0 | productivity | Product strategist agent for use case discovery, value prop analysis, feature prioritization, trade-offs, and risk mapping. Includes /brainstorm, /product-review, /use-cases, and /trade-offs skills. |
 | workflow-guard | Workflow Guard | 1.0.0 | devops | Workflow enforcement agent for managing PreToolUse/PostToolUse hook guards. Ships with a PR creation gate template. Use /guard to set up, list, or remove guards. |
 | rpi-workflow | RPI Workflow | 1.0.0 | productivity | Research-Plan-Implement workflow framework for structured software development. Provides 8 slash commands (/0-define-work through /7-complete-work) that guide work from definition through PR merge. |
+| component-advisor | Component Advisor | 1.0.0 | productivity | External component and library advisor. Discovers, evaluates, and recommends third-party packages that fit your architecture and existing dependency graph. |
 
 Use `/plugin show <id>` for detailed information about each plugin.
 
@@ -174,6 +175,42 @@ Not every work item needs all steps:
 
 **Configuration:** Optional. Place a `rpi-config.json` in `.claude/` to define project structure, architecture layers, build/test commands, and validation rules. Works with auto-detected defaults if no config exists. See [rpi-workflow.md](rpi-workflow/agents/rpi-workflow.md) for details.
 
+### component-advisor: How It Works
+
+component-advisor operates during the design phase of new software or feature extensions. It identifies when external libraries or packages are the right solution, finds the best candidates, evaluates them against your existing stack, and makes well-reasoned recommendations.
+
+**Key capabilities:**
+- Auto-detects project ecosystem (.NET, Node.js, Python, Rust, Go, Java, Ruby)
+- Reads existing dependency manifests to check for overlap and conflicts
+- Interview-driven — asks clarifying questions before searching
+- Evaluates candidates on maintenance health, security, license, API fit, and strategic risk
+- Build vs. adopt analysis for borderline cases
+
+**Skills:** Four user-invocable skills:
+
+- `/find-component` — Interview-driven discovery: "I need to do X, what's out there?"
+- `/audit-dependencies` — Health scan: security, outdated, overlap, unused packages
+- `/compare-components` — Structured side-by-side evaluation with decision matrix
+- `/check-compatibility` — Go/no-go check for a specific package against your stack
+
+**Quick usage:**
+
+```bash
+# Find a library for a design need
+/find-component CSV parsing with streaming support
+
+# Audit your project's dependency health
+/audit-dependencies
+
+# Compare two candidates
+/compare-components CsvHelper vs Sylvan.Data.Csv
+
+# Check if a package fits before adopting
+/check-compatibility Polly v8.2
+```
+
+**Configuration:** Optional. Place `component-advisor.json` in `.claude/` to define license policies, maintenance thresholds, and security policy. Works with sensible defaults if no config exists. See [component-advisor.md](component-advisor/agents/component-advisor.md) for details.
+
 ## Plugin Structure
 
 Each plugin is a markdown specification file that defines:
@@ -263,6 +300,7 @@ Key directories:
 | `product-advisor/` | Product strategist agent (plugin.json + agent spec + skills) |
 | `workflow-guard/` | Workflow enforcement agent (plugin.json + agent spec + skill + templates) |
 | `rpi-workflow/` | RPI workflow agent (plugin.json + agent spec + 8 skills + config template) |
+| `component-advisor/` | Component advisor agent (plugin.json + agent spec + 4 skills) |
 | `shared/` | Shared governance principles used by doc-maintainer and doc-pr-reviewer |
 | `docs/` | Architecture docs, plugin development guide, ADRs |
 | `.claude-plugin/` | Marketplace registry |
@@ -286,5 +324,5 @@ See `CLAUDE.md` for detailed workflow and branch naming conventions.
 
 ## Version
 
-Marketplace Version: 1.3.0
+Marketplace Version: 1.4.0
 Last Updated: 2026-04-01
