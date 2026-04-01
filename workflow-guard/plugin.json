@@ -1,6 +1,6 @@
 {
   "name": "workflow-guard",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Workflow enforcement agent for managing PreToolUse/PostToolUse hook guards. Ships with a PR creation gate template. Use /guard to set up, list, or remove guards.",
   "author": {
     "name": "AgentPlugins"

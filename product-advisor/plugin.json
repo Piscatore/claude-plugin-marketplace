@@ -1,6 +1,6 @@
 {
   "name": "product-advisor",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Product strategist agent for use case discovery, value prop analysis, feature prioritization, trade-offs, and risk mapping. Includes /brainstorm, /product-review, /use-cases, and /trade-offs skills.",
   "author": {
     "name": "AgentPlugins"

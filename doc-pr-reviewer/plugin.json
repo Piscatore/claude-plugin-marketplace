@@ -1,6 +1,6 @@
 {
   "name": "doc-pr-reviewer",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Reviews Pull Requests for documentation compliance. Config-aware with CI automation support. Inherits project conventions from doc-maintainer or standalone config. Supports advisory, strict, auto-fix, and CI modes.",
   "author": {
     "name": "AgentPlugins"

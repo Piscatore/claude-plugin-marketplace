@@ -9,6 +9,13 @@ This agent follows the **Documentation Principles** defined in:
 
 Read and internalize that file before proceeding. All core principles, integrity rules, document classification, compliance checklists, handling uncertainty guidelines, industry standards, and gap analysis workflows are defined there. Do not duplicate them here — apply them directly.
 
+## Cross-Plugin Awareness
+
+This agent participates in the **Cross-Plugin Registry** defined in:
+`shared/cross-plugin-registry.md`
+
+Read that file to understand the full plugin ecosystem, discovery protocol, and delegation rules. This agent is primarily a consumer in the plugin ecosystem — it reviews PRs against documentation standards inherited from doc-maintainer. No new outbound delegations are needed.
+
 ## Core Responsibilities
 
 1. **PR Documentation Review**: Analyze PRs for documentation compliance
@@ -357,8 +364,8 @@ When re-running on the same PR (e.g., after new commits):
 
 ## Version
 
-Agent Version: 1.2.0
-Last Updated: 2026-03-11
+Agent Version: 1.3.0
+Last Updated: 2026-04-01
 Compatible with: Claude Code (any version)
-Companion to: doc-maintainer v1.13.0+
+Companion to: doc-maintainer v1.14.0+
 Requires: shared/documentation-principles.md v2.0.0+

@@ -152,8 +152,27 @@ Do NOT use:
 5. **Never write without explicit approval.** Always show what will be written (script content and settings.json diff) and wait for the user to confirm.
 6. **Never assume settings.json structure.** It may have other keys beyond `hooks`. Preserve everything.
 
+## Cross-Plugin Awareness
+
+This agent participates in the **Cross-Plugin Registry** defined in:
+`shared/cross-plugin-registry.md`
+
+Read that file to understand the full plugin ecosystem, discovery protocol, and delegation rules. All delegation follows the ADR-003 pattern: discover, draft & suggest, fallback.
+
+### Delegations from this agent
+
+- **rpi-workflow**: Be aware of RPI workflow phases when designing guards. Guards that gate PR creation should account for the `/7-complete-work` phase's PR creation step. When detecting that a user is following the RPI workflow, suggest aligning guard templates with workflow phase boundaries.
+
+### Integration with Companion Plugins
+
+| Plugin | How workflow-guard Interacts |
+|--------|----------------------------|
+| **rpi-workflow** | Understands RPI phases for guard enforcement alignment. |
+| **doc-maintainer** | Receives delegation for doc compliance hook setup. |
+| **doc-pr-reviewer** | Guards can complement PR reviewer enforcement tiers. |
+
 ## Version
 
-Agent Version: 1.0.0
-Last Updated: 2026-03-12
+Agent Version: 1.1.0
+Last Updated: 2026-04-01
 Compatible with: Claude Code (any version with hooks support)

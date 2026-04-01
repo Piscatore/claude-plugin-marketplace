@@ -59,20 +59,27 @@ This repository contains Claude Code plugins:
 - `rpi-workflow` - Research-Plan-Implement workflow framework for structured software development
 - `component-advisor` - External component and library advisor for design phases
 - `shared/documentation-principles.md` - Shared principles used by doc-maintainer and doc-pr-reviewer
+- `shared/cross-plugin-registry.md` - Cross-plugin discovery, delegation protocol, and integration matrix used by all plugins
 
 ## Shared Dependencies Architecture
 
-Both plugins depend on `shared/documentation-principles.md` for common logic:
+Two shared files provide common logic across plugins:
+
+**`shared/documentation-principles.md`** — Documentation governance (used by doc-maintainer, doc-pr-reviewer):
 - Handling Uncertainty (three-layer knowledge acquisition)
 - Industry Standards Reference
 - Documentation Gap Analysis
 
+**`shared/cross-plugin-registry.md`** — Cross-plugin awareness (used by all 6 plugins):
+- Plugin inventory, discovery protocol, delegation rules (ADR-003)
+- Integration matrix defining which plugins delegate to which
+
 ```
-shared/documentation-principles.md
-        ↓ (referenced by)
-   ┌────┴────┐
-   ↓         ↓
-doc-maintainer  doc-pr-reviewer
+shared/documentation-principles.md        shared/cross-plugin-registry.md
+        ↓ (referenced by)                         ↓ (referenced by all 6)
+   ┌────┴────┐                    ┌────┬────┬────┬┴───┬────┬────┐
+   ↓         ↓                    ↓    ↓    ↓    ↓    ↓    ↓    ↓
+doc-maintainer  doc-pr-reviewer  doc-m doc-pr prod comp rpi  wfg
 ```
 
 ## Versioning Rules (IMPORTANT)
@@ -86,6 +93,15 @@ doc-maintainer  doc-pr-reviewer
    - `doc-pr-reviewer/agents/doc-pr-reviewer.md`
 3. Update `README.md` plugin version table
 4. Update the compatibility table in the shared file
+
+### When updating `shared/cross-plugin-registry.md`:
+1. Increment the registry file's version (semver)
+2. Increment the patch version of ALL 6 plugins:
+   - All `*/plugin.json` files
+   - All `*/agents/*.md` files
+3. Update `.claude-plugin/marketplace.json` versions
+4. Update `README.md` plugin version table
+5. Update the compatibility table below
 
 ### When adding new features:
 - If feature applies to BOTH agents → Add to `shared/documentation-principles.md`
@@ -107,6 +123,14 @@ Use this when making changes:
 - [ ] `doc-pr-reviewer/agents/doc-pr-reviewer.md` - version
 - [ ] `README.md` - version table
 
+**Registry file update:**
+- [ ] `shared/cross-plugin-registry.md` - version + content
+- [ ] All 6 `*/plugin.json` - version
+- [ ] All 6 `*/agents/*.md` - version
+- [ ] `.claude-plugin/marketplace.json` - all 6 entries
+- [ ] `README.md` - version table
+- [ ] `CLAUDE.md` - compatibility table
+
 **Single plugin update:**
 - [ ] `[plugin]/plugin.json` - version
 - [ ] `[plugin]/agents/[agent].md` - version
@@ -116,7 +140,7 @@ Use this when making changes:
 
 | shared/ | doc-maintainer | doc-pr-reviewer | product-advisor | workflow-guard | rpi-workflow | component-advisor |
 |---------|----------------|-----------------|-----------------|----------------|--------------|-------------------|
-| 2.0.0   | 1.13.0         | 1.2.0           | 1.0.0           | 1.0.0          | 1.0.0        | 1.0.0             |
+| 2.0.0   | 1.14.0         | 1.3.0           | 1.1.0           | 1.1.0          | 1.1.0        | 1.1.0             |
 
 Update this table when versions change.
 

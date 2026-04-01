@@ -30,6 +30,18 @@ This agent follows the **Documentation Principles** defined in:
 
 Read and internalize that file before proceeding. All core principles, integrity rules, document classification, compliance checklists, handling uncertainty guidelines, industry standards, and gap analysis workflows are defined there. Do not duplicate them here — apply them directly.
 
+## Cross-Plugin Awareness
+
+This agent participates in the **Cross-Plugin Registry** defined in:
+`shared/cross-plugin-registry.md`
+
+Read that file to understand the full plugin ecosystem, discovery protocol, and delegation rules. All delegation follows the ADR-003 pattern: discover, draft & suggest, fallback.
+
+### Delegations from this agent
+
+- **product-advisor**: When an audit reveals product strategy gaps (missing value propositions, unclear use cases, undocumented trade-offs), suggest the user invoke product-advisor for a `/product-review` or `/use-cases` analysis.
+- **workflow-guard**: When setting up documentation compliance enforcement, suggest the user invoke workflow-guard's `/guard` skill to install PreToolUse hooks that gate documentation changes.
+
 ## Core Responsibilities
 
 1. **Documentation Indexing**: Build and maintain searchable index of all documentation
@@ -748,6 +760,8 @@ In non-interactive mode: refuse changes and warn user. Audit is the only operati
 
 ## Companion Plugins
 
+See `shared/cross-plugin-registry.md` for the full integration matrix.
+
 | Tier | Tool | Enforcement |
 | ---- | ---- | ----------- |
 | 1 | **doc-pr-reviewer** (advisory) | Comments on PRs |
@@ -755,9 +769,16 @@ In non-interactive mode: refuse changes and warn user. Audit is the only operati
 | 3 | **GitHub Action** | CI-based audit |
 | 4 | **Pre-commit hook** | Blocks unauthorized commits |
 
+| Plugin | How doc-maintainer Interacts |
+|--------|------------------------------|
+| **product-advisor** | Suggests product analysis when audit finds strategy gaps. |
+| **workflow-guard** | Suggests hook setup for doc compliance enforcement. |
+| **rpi-workflow** | Receives delegation when implementation produces documentation. |
+| **component-advisor** | Receives delegation for filing audit reports. |
+
 ## Version
 
-Agent Version: 1.13.0
-Last Updated: 2026-03-11
+Agent Version: 1.14.0
+Last Updated: 2026-04-01
 Compatible with: Claude Code (any version)
 Requires: shared/documentation-principles.md v2.0.0+

@@ -71,3 +71,33 @@ If `.claude/rpi-config.json` is not found:
 3. **Auto-commit** at phase checkpoints during implementation
 4. **Push after every commit** — never leave work only on local
 5. **Verify acceptance criteria** before creating a PR
+
+## Cross-Plugin Awareness
+
+This agent participates in the **Cross-Plugin Registry** defined in:
+`shared/cross-plugin-registry.md`
+
+Read that file to understand the full plugin ecosystem, discovery protocol, and delegation rules. All delegation follows the ADR-003 pattern: discover, draft & suggest, fallback.
+
+### Delegations from this agent
+
+- **doc-maintainer**: When implementation produces documentation artifacts (briefs, plans, research notes), suggest the user invoke doc-maintainer for proper filing with versioning and governance.
+- **component-advisor**: During `/1-research`, when the codebase research identifies dependency or library needs, suggest `/find-component` or `/audit-dependencies` for evaluation.
+- **product-advisor**: During `/0-define-work`, when requirements are unclear or the feature scope is ambiguous, suggest `/use-cases` or `/brainstorm` for structured analysis.
+- **workflow-guard**: During `/7-complete-work`, if no PR gate hook exists, suggest `/guard setup` to install enforcement before PR creation.
+
+### Integration with Companion Plugins
+
+| Plugin | How rpi-workflow Interacts |
+|--------|--------------------------|
+| **doc-maintainer** | Suggests filing documentation produced during implementation. |
+| **component-advisor** | Suggests dependency evaluation during codebase research phase. |
+| **product-advisor** | Suggests requirements analysis when work definition is ambiguous. |
+| **workflow-guard** | Suggests PR gate hooks for workflow enforcement. |
+
+## Version
+
+Agent Version: 1.1.0
+Last Updated: 2026-04-01
+Compatible with: Claude Code (any version)
+Optional integration: doc-maintainer v1.14.0+, component-advisor v1.1.0+, product-advisor v1.1.0+, workflow-guard v1.1.0+

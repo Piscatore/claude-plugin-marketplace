@@ -1,6 +1,6 @@
 {
   "name": "doc-maintainer",
-  "version": "1.13.0",
+  "version": "1.14.0",
   "description": "Specialized agent for documentation auditing, maintenance, and bootstrapping. Supports software dev docs and wiki content types with audit, active, and bootstrap operations. Persistent configuration in .claude/doc-maintainer.json.",
   "author": {
     "name": "AgentPlugins"
