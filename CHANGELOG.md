@@ -31,8 +31,19 @@ For per-component version history, see the Version section in each agent spec:
 - Session save/resume for mid-work pauses
 - PR creation with acceptance criteria verification
 
-### Marketplace v1.3.0
+### component-advisor v1.0.0 (New Plugin)
+- External component and library advisor for software design phases
+- Auto-detects project ecosystem (.NET, Node.js, Python, Rust, Go, Java, Ruby)
+- Interview-driven workflow — asks clarifying questions before searching
+- 4 skills: `/find-component`, `/audit-dependencies`, `/compare-components`, `/check-compatibility`
+- Evaluates candidates on maintenance health, security, license, API fit, and strategic risk
+- Overlap and conflict detection against existing dependency graph
+- Build vs. adopt analysis framework
+- Configurable license policies, maintenance thresholds, and security policy via `.claude/component-advisor.json`
+
+### Marketplace v1.4.0
 - Added rpi-workflow plugin to marketplace registry
+- Added component-advisor plugin to marketplace registry
 
 ## 2026-03-12
 

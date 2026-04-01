@@ -57,6 +57,7 @@ Your `agents/your-agent.md` file is the core of the plugin. It defines the agent
 - [product-advisor/agents/product-advisor.md](product-advisor/agents/product-advisor.md) -- example with skills directory pattern
 - [workflow-guard/agents/workflow-guard.md](workflow-guard/agents/workflow-guard.md) -- example with templates directory pattern
 - [rpi-workflow/agents/rpi-workflow.md](rpi-workflow/agents/rpi-workflow.md) -- example with multi-skill workflow pattern
+- [component-advisor/agents/component-advisor.md](component-advisor/agents/component-advisor.md) -- example with web search and evaluation pattern
 
 ### 4. Register in the marketplace
 

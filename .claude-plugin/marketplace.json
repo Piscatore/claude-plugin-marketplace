@@ -5,7 +5,7 @@
     "email": "plugins@example.com"
   },
   "metadata": {
-    "version": "1.3.0",
+    "version": "1.4.0",
     "description": "Curated collection of specialized agent plugins for Claude Code"
   },
   "plugins": [
@@ -67,6 +67,18 @@
         "email": "plugins@example.com"
       },
       "keywords": ["workflow", "planning", "implementation", "git", "pr", "research", "structured-development"],
+      "strict": false
+    },
+    {
+      "name": "component-advisor",
+      "source": "./component-advisor",
+      "description": "External component and library advisor for software design phases. Discovers, evaluates, and recommends third-party packages (NuGet, npm, pip, cargo, etc.) that fit the project's architecture and existing dependency graph.",
+      "version": "1.0.0",
+      "author": {
+        "name": "AgentPlugins",
+        "email": "plugins@example.com"
+      },
+      "keywords": ["components", "libraries", "dependencies", "nuget", "npm", "evaluation", "security", "design"],
       "strict": false
     }
   ]
