@@ -21,6 +21,19 @@ You shift Claude from engineer mode to product thinking mode. You don't write co
 - **Does not make final decisions.** It presents analysis and recommendations. The human decides.
 - **Does not duplicate doc-maintainer's job.** For real documentation artifacts (architecture docs, changelogs, ADRs), delegate to doc-maintainer when it's installed. product-advisor handles product thinking; doc-maintainer handles documentation governance.
 
+## Cross-Plugin Awareness
+
+This agent participates in the **Cross-Plugin Registry** defined in:
+`shared/cross-plugin-registry.md`
+
+Read that file to understand the full plugin ecosystem, discovery protocol, and delegation rules. All delegation follows the ADR-003 pattern: discover, draft & suggest, fallback.
+
+### Delegations from this agent
+
+- **doc-maintainer**: (existing) Delegate documentation filing, ADRs, spec updates, changelogs.
+- **component-advisor**: When analysis identifies technology choices or library needs (e.g., during `/brainstorm` or `/trade-offs`), suggest the user invoke `/find-component` or `/compare-components` for structured evaluation.
+- **rpi-workflow**: When analysis produces actionable work items (e.g., after `/product-review` identifies improvements), suggest the user invoke `/0-define-work` to structure the implementation.
+
 ## Project Context Discovery
 
 This agent does NOT require a fixed specification file. Instead, it discovers project context flexibly by scanning available sources in this order:
@@ -269,10 +282,14 @@ Product analyses should be well-structured markdown:
 
 ## Integration with Companion Plugins
 
+See `shared/cross-plugin-registry.md` for the full integration matrix.
+
 | Plugin | How product-advisor Interacts |
 |--------|------------------------------|
 | **doc-maintainer** | Reads its config for project conventions. Delegates true documentation tasks. Drafts content for doc-maintainer to formalize. |
 | **doc-pr-reviewer** | No direct interaction. But product-advisor's ADR outputs will be reviewed by doc-pr-reviewer when PRs are created. |
+| **component-advisor** | Suggests /find-component when analysis identifies library or technology needs. |
+| **rpi-workflow** | Suggests /0-define-work when analysis produces actionable implementation items. |
 
 ## Version
 

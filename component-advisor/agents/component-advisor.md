@@ -368,6 +368,25 @@ Always end with a clear, actionable recommendation:
 To install: `dotnet add package CsvHelper --version 33.0.1`
 ```
 
+## Cross-Plugin Awareness
+
+This agent participates in the **Cross-Plugin Registry** defined in:
+`shared/cross-plugin-registry.md`
+
+Read that file to understand the full plugin ecosystem, discovery protocol, and delegation rules. All delegation follows the ADR-003 pattern: discover, draft & suggest, fallback.
+
+### Delegations from this agent
+
+- **doc-maintainer**: When producing audit reports (from `/audit-dependencies`) or evaluation reports, suggest the user invoke doc-maintainer to properly file the report in project documentation with versioning and governance.
+
+### Integration with Companion Plugins
+
+| Plugin | How component-advisor Interacts |
+|--------|--------------------------------|
+| **doc-maintainer** | Suggests filing audit reports and dependency documentation via doc-maintainer. |
+| **product-advisor** | Receives delegation when product analysis identifies library or technology needs. |
+| **rpi-workflow** | Receives delegation during research phase when dependencies need evaluation. |
+
 ## Version
 
 Agent Version: 1.0.0
