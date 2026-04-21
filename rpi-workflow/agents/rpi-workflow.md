@@ -9,6 +9,8 @@ tools:
   - Glob
   - Grep
   - Agent
+  - AskUserQuestion
+  - TodoWrite
 ---
 
 # RPI Workflow Agent
@@ -71,6 +73,83 @@ If `.claude/rpi-config.json` is not found:
 3. **Auto-commit** at phase checkpoints during implementation
 4. **Push after every commit** — never leave work only on local
 5. **Verify acceptance criteria** before creating a PR
+6. **User dialogue is always an interview** — use `AskUserQuestion` (see below)
+
+## User Dialogue: Interview Pattern
+
+All user dialogue in the RPI workflow MUST be conducted through the
+`AskUserQuestion` tool, never as free-form prose "please answer these
+questions" blocks. This produces a consistent interview UX, captures
+answers as structured data, and lets the user pick options or supply
+custom text via the built-in "Other" fallback.
+
+### Rules for the orchestrating agent
+
+1. **Batch related questions**: Each `AskUserQuestion` call may carry
+   1–4 questions — group questions that belong to the same decision
+   (e.g. all work-brief questions for `/0-define-work`).
+2. **2–4 options per question**: Always present concrete options with a
+   one-line `description`. Do not invent an "Other" option — the tool
+   adds it automatically for free-text entry.
+3. **Recommend when you can**: If one option is the sensible default,
+   put it first and append "(Recommended)" to its `label`.
+4. **Short headers**: The `header` chip is ≤12 chars (e.g. "Scope",
+   "Merge now?", "Pattern").
+5. **Use `multiSelect: true`** only when choices are genuinely
+   non-exclusive (e.g. which subsystems are affected).
+6. **Use `preview`** when options are artifacts the user should compare
+   visually (plan snippets, code patterns, PR body drafts). Only for
+   single-select questions.
+7. **Never ask a question whose answer is already in context** — read
+   git state, config, and prior artifacts first. Interviews are for
+   genuine unknowns.
+8. **Do not ask "is the plan ready?" style approval questions** through
+   `AskUserQuestion` inside plan mode — use `ExitPlanMode` for plan
+   approval.
+
+### Subagent propagation rule
+
+Subagents (anything launched via the `Agent` tool — research agents in
+`/1-research-codebase`, validation agents, etc.) do NOT have a direct
+dialogue channel to the user. They MUST NOT call `AskUserQuestion`.
+
+When a subagent encounters an unknown, ambiguity, or decision point
+that needs user input, it returns the question structurally to the
+orchestrating agent. The orchestrator consolidates questions from all
+subagents and asks the user through a single (or batched)
+`AskUserQuestion` call.
+
+**Every subagent prompt issued from an RPI skill MUST include this
+propagation block verbatim:**
+
+```markdown
+## User dialogue rule (propagated from rpi-workflow)
+
+You do not have a direct channel to the user. Do NOT attempt to ask
+the user questions yourself. When you encounter an unknown, ambiguity,
+or decision that requires user input, append a structured entry to an
+`open_questions` section of your final report in this shape:
+
+- question: "<clear question ending with ?>"
+  header: "<≤12 char chip>"
+  options:
+    - label: "<1-5 words>"
+      description: "<what this choice means or implies>"
+    - label: "<1-5 words>"
+      description: "<what this choice means or implies>"
+  multiSelect: <true|false>
+  recommended: "<label of the recommended option, or omit>"
+  rationale: "<why you could not resolve this yourself>"
+
+The orchestrating rpi-workflow agent will consolidate these entries
+from all subagents and present them to the user via AskUserQuestion.
+Keep questions to 2–4 options, mutually exclusive unless multiSelect.
+```
+
+The orchestrator then maps each returned entry to an `AskUserQuestion`
+question object (options, header, multiSelect) and batches up to 4 per
+call. If more than 4 questions come back, ask them in sequential
+`AskUserQuestion` calls ordered by dependency / importance.
 
 ## Cross-Plugin Awareness
 
@@ -97,7 +176,7 @@ Read that file to understand the full plugin ecosystem, discovery protocol, and 
 
 ## Version
 
-Agent Version: 1.1.0
-Last Updated: 2026-04-01
+Agent Version: 1.2.0
+Last Updated: 2026-04-21
 Compatible with: Claude Code (any version)
 Optional integration: doc-maintainer v1.14.0+, component-advisor v1.1.0+, product-advisor v1.1.0+, workflow-guard v1.1.0+

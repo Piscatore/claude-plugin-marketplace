@@ -46,9 +46,23 @@ Walk through each acceptance criterion:
 - [ ] Criterion 3: {NOT MET — explain}
 ```
 
-If any are not met, ask the user:
-- Defer to a follow-up? (acceptable for the PR)
-- Implement now before completing?
+If any are not met, ask the user via `AskUserQuestion`. Batch one
+question per unmet criterion (up to 4 per call):
+
+```
+AskUserQuestion({
+  questions: unmet.map(c => ({
+    question: `"${c.text}" is not satisfied. How do you want to handle it?`,
+    header: "Unmet AC",
+    multiSelect: false,
+    options: [
+      { label: "Defer to follow-up",      description: "Open a follow-up work item; PR proceeds without it" },
+      { label: "Implement now",           description: "Stay on this branch and complete it before PR" },
+      { label: "Drop from acceptance",    description: "Remove this criterion from the brief (was wrong)" }
+    ]
+  }))
+})
+```
 
 ### 4. Review the Diff
 
@@ -86,14 +100,36 @@ EOF
 
 ### 6. Merge Decision
 
-Ask the user: **Merge now or wait for review?**
+Ask the user via `AskUserQuestion`. Offer the PR body as a `preview` on
+the "Merge now" option so the user sees exactly what will land:
 
-**If merge now:**
-```bash
-gh pr merge --squash --delete-branch
+```
+AskUserQuestion({
+  questions: [{
+    question: "PR #{N} is open. How do you want to proceed?",
+    header: "Merge now?",
+    multiSelect: false,
+    options: [
+      {
+        label: "Wait for review (Recommended)",
+        description: "Report PR URL and stop — reviewers take over"
+      },
+      {
+        label: "Squash-merge now",
+        description: "gh pr merge --squash --delete-branch and run post-merge cleanup",
+        preview: "{PR body preview}"
+      },
+      {
+        label: "Merge commit now",
+        description: "gh pr merge --merge --delete-branch (preserves commit history)"
+      }
+    ]
+  }]
+})
 ```
 
-**If wait**: Report the PR URL and stop.
+**If merge now**: run the chosen `gh pr merge` variant and proceed to
+step 7. **If wait**: report the PR URL and stop.
 
 ### 7. Post-merge Cleanup
 

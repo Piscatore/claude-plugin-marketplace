@@ -38,11 +38,27 @@ Verify:
 
 ### 3. Identify Affected Subsystems
 
-**If config has `research.subsystems`**: Use them to scope the research.
-Present the list and ask which subsystems are likely affected.
+**If config has `research.subsystems`**: Ask the user which subsystems
+are likely affected via `AskUserQuestion` with `multiSelect: true`:
 
-**If no config**: Infer subsystems from the directory structure. Look for
-common patterns: `src/`, `lib/`, `app/`, `tests/`, config files, schema files.
+```
+AskUserQuestion({
+  questions: [{
+    question: "Which subsystems are likely affected by this work?",
+    header: "Subsystems",
+    multiSelect: true,
+    options: config.research.subsystems.map(s => ({
+      label: s.name,
+      description: s.description || s.path
+    }))
+  }]
+})
+```
+
+**If no config**: Infer subsystems from the directory structure (`src/`,
+`lib/`, `app/`, `tests/`, schema files) and present the inferred list
+through the same `AskUserQuestion` pattern so the user can confirm or
+correct before research starts.
 
 ### 4. Launch Parallel Research Agents
 
@@ -62,6 +78,26 @@ current code handles analogous operations end-to-end.
 Find established patterns for the type of code being added. Collect
 templates and conventions that the new code must follow.
 
+**Subagent dialogue rule — propagate to every subagent prompt.**
+Every `Agent` call issued from this skill MUST include the propagation
+block defined in `agents/rpi-workflow.md` → "Subagent propagation rule".
+In short: subagents never call `AskUserQuestion` themselves — they
+return structured `open_questions` entries. This orchestrating skill
+consolidates questions from all three agents and presents them to the
+user in step 6.
+
+Concretely, each `Agent({ prompt })` call must include, near the top of
+the prompt:
+
+> You do not have a direct channel to the user. Do NOT attempt to ask
+> the user questions yourself. When you encounter an unknown, ambiguity,
+> or decision that requires user input, append a structured entry to an
+> `open_questions` section of your final report. See the rpi-workflow
+> agent spec for the exact shape (question, header, options with
+> label+description, multiSelect, recommended, rationale). The
+> orchestrating rpi-workflow agent will consolidate entries from all
+> subagents and ask the user via AskUserQuestion.
+
 ### 5. Synthesize Research
 
 Combine findings into a research document covering:
@@ -74,23 +110,70 @@ Combine findings into a research document covering:
 - **Risks**: Breaking changes, migration concerns, performance implications
 - **Open questions**: Anything not resolved by reading code
 
-### 6. CLARIFICATION GATE
+### 6. CLARIFICATION GATE (Interview)
 
-**Before saving the research, pause and present to the user:**
+**Before saving the research, consolidate and ask the user.** Merge the
+`open_questions` sections returned by every subagent into one ordered
+list, deduplicate near-identical questions, and add any assumptions /
+risks this skill itself is unsure about.
 
-1. List all **open questions** — things the research could not answer:
-   - Ambiguous requirements from the brief
-   - Design decisions with multiple valid approaches
-   - External dependencies or unknowns
-   - Scope questions ("does this include X?")
+**Present via `AskUserQuestion`, batched 1–4 per call, ordered by
+dependency and impact.** Each consolidated question must include:
 
-2. List all **assumptions** being made and ask the user to confirm or correct.
+- a concrete question text,
+- a ≤12-char `header`,
+- 2–4 mutually exclusive `options` (or `multiSelect: true` when genuinely
+  non-exclusive — e.g. "which of these files are in scope?"),
+- one option marked `(Recommended)` if the research points clearly to a
+  preferred answer, based on the `recommended` hint from the subagent,
+- `preview` content when options are code snippets / pattern examples
+  that the user should visually compare.
 
-3. List any **risks** that might change the scope or approach.
+**Pseudo-example** of consolidating three subagent returns into one call:
 
-**Wait for the user to respond.** Incorporate their answers into the
-research document before saving. If answers change the scope, update
-the work brief as well.
+```
+// subagent returns (open_questions):
+//   file-locator  → "Is legacy adapter X in scope?"
+//   code-analyzer → "Which existing handler's pattern should we follow?"
+//   pattern-finder→ "DI via factory or constructor?"
+AskUserQuestion({
+  questions: [
+    {
+      question: "Is legacy adapter X in scope for this change?",
+      header: "Scope: X",
+      multiSelect: false,
+      options: [
+        { label: "In scope",               description: "Update X as part of this work item" },
+        { label: "Out of scope (follow-up)",description: "Defer X to a later work item" }
+      ]
+    },
+    {
+      question: "Which existing handler's pattern should we follow?",
+      header: "Pattern",
+      multiSelect: false,
+      options: [
+        { label: "HandlerA (Recommended)", description: "Closest analog — used for similar events", preview: "// HandlerA.cs excerpt…" },
+        { label: "HandlerB",               description: "Newer style but different lifecycle",       preview: "// HandlerB.cs excerpt…" }
+      ]
+    },
+    {
+      question: "How should the new service be wired?",
+      header: "DI style",
+      multiSelect: false,
+      options: [
+        { label: "Constructor injection (Recommended)", description: "Matches current DI pattern" },
+        { label: "Factory",                             description: "Only if lifetime is per-request" }
+      ]
+    }
+  ]
+})
+```
+
+If more than 4 questions come back, issue additional `AskUserQuestion`
+calls in dependency order (earlier answers may change later options).
+
+**Incorporate answers** into the research document before saving. If
+answers change scope, update the work brief as well.
 
 ### 7. Save Research
 

@@ -61,7 +61,7 @@
       "name": "rpi-workflow",
       "source": "./rpi-workflow",
       "description": "Research-Plan-Implement workflow framework for structured software development. Provides 8 slash commands (/0_define_work through /7_complete_work) that guide work from definition through PR merge. Configurable per-project via .claude/rpi-config.json.",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "AgentPlugins",
         "email": "plugins@example.com"

@@ -33,18 +33,50 @@ git stash list
 | Condition | Action |
 |-----------|--------|
 | On `main` with no feature branches | No work in progress — suggest `/0-define-work` |
-| On `main` with uncommitted changes | Dangerous — ask user what happened |
+| On `main` with uncommitted changes | Dangerous — interview user via `AskUserQuestion` |
 | On a feature branch, clean | Good — proceed to load session |
-| On a feature branch, dirty | Uncommitted work — ask: commit or stash? |
-| Stashed changes exist | Alert user — may be forgotten work |
+| On a feature branch, dirty | Uncommitted work — interview: commit, stash, or discard? |
+| Stashed changes exist | Alert user via `AskUserQuestion` — may be forgotten work |
+
+When a condition requires user input, ask through `AskUserQuestion` with
+concrete options. Example for the "feature branch, dirty" case:
+
+```
+AskUserQuestion({
+  questions: [{
+    question: "Branch '{branch}' has {N} uncommitted changes. How do you want to handle them before resuming?",
+    header: "Dirty state",
+    multiSelect: false,
+    options: [
+      { label: "Commit now (Recommended)", description: "wip commit with a resume-marker message, then continue" },
+      { label: "Stash",                    description: "git stash; pop before resuming implementation" },
+      { label: "Discard",                  description: "git checkout -- .; lose the uncommitted work" }
+    ]
+  }]
+})
+```
 
 **Do not proceed until the branch state is clean and understood.**
 
 ### 3. Find Sessions
 
 List session files in `{workingDirs.sessions}/`.
-If multiple exist, show them and ask which to resume.
-If only one exists, load it automatically.
+If only one exists, load it automatically. If multiple exist, ask via
+`AskUserQuestion`:
+
+```
+AskUserQuestion({
+  questions: [{
+    question: "Which session do you want to resume?",
+    header: "Session",
+    multiSelect: false,
+    options: sessions.map(s => ({
+      label: s.featureSlug,
+      description: `${s.status} · updated ${s.lastUpdated} · ${s.currentStep}`
+    }))
+  }]
+})
+```
 
 If no session files exist, check for briefs and plans — the user may
 have gotten partway through the workflow without saving a session.

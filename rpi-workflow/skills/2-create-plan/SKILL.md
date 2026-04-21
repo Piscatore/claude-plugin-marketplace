@@ -51,23 +51,67 @@ For each phase:
 - Which existing code to follow as a pattern
 - How to verify the phase is correct
 
-### 4. CLARIFICATION GATE
+### 4. CLARIFICATION GATE (Interview)
 
-**Before finalizing the plan, pause and present to the user:**
+**Before finalizing the plan, conduct a structured interview via
+`AskUserQuestion`.** Group questions into three categories — design,
+scope, and risk trade-offs — and ask each as a concrete multiple-choice
+question. Do NOT present these as a free-form list.
 
-1. **Design decisions** with multiple valid approaches:
-   - "Should X use pattern A or pattern B?"
-   - "The spec says Y but the codebase does Z — which do we follow?"
+For **design decisions**, prefer `preview` content so the user can
+visually compare the two approaches:
 
-2. **Scope questions** from research or emerging from the plan:
-   - "The research found X is also affected — is that in scope?"
-   - "Should we use library X or build this by hand?"
+```
+AskUserQuestion({
+  questions: [{
+    question: "Should X be implemented with pattern A or pattern B?",
+    header: "Pattern",
+    multiSelect: false,
+    options: [
+      {
+        label: "Pattern A (Recommended)",
+        description: "Matches existing code in HandlerA; simpler to review",
+        preview: "// Pattern A — example\nclass Thing : IThing {\n  public Thing(IDep dep) { … }\n}"
+      },
+      {
+        label: "Pattern B",
+        description: "Newer style; more flexible but diverges from codebase",
+        preview: "// Pattern B — example\nclass Thing : IThing {\n  public static Thing Create(IDep dep) => …\n}"
+      }
+    ]
+  }]
+})
+```
 
-3. **Risk trade-offs** the user should weigh in on:
-   - "This approach is simpler but less flexible later"
-   - "This changes an existing interface — acceptable?"
+For **scope questions**, use single-select In-scope / Out-of-scope /
+Not-applicable options (same shape as `/0-define-work` batch 3).
 
-**Wait for the user to respond.** Incorporate their decisions into the plan.
+For **risk trade-offs**, phrase the question as a concrete choice, not
+an open "what do you think":
+
+```
+AskUserQuestion({
+  questions: [{
+    question: "This approach changes the signature of IFoo.Bar(). Which trade-off do you accept?",
+    header: "Breaking?",
+    multiSelect: false,
+    options: [
+      { label: "Break and update callers", description: "Cleaner end state; requires touching {N} callers" },
+      { label: "Add overload, keep old",   description: "Backward compatible; leaves dead code until cleanup" }
+    ]
+  }]
+})
+```
+
+**Batch up to 4 related questions per call.** If more than 4 questions
+are open, ask them in sequential `AskUserQuestion` calls ordered by
+dependency. Incorporate every answer into the plan before step 5.
+
+**Subagent propagation**: if this skill delegates any research or
+comparison step to a subagent, include the propagation block from
+`agents/rpi-workflow.md` in the subagent prompt. Subagents return
+structured `open_questions`; this skill consolidates them into the
+`AskUserQuestion` calls above.
 
 ### 5. Write the Plan
 

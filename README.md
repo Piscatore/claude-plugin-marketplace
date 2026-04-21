@@ -38,7 +38,7 @@ This connects your Claude Code instance to the marketplace.
 | doc-pr-reviewer | Documentation PR Reviewer | 1.3.0 | productivity | Reviews Pull Requests for documentation compliance. Config-aware with CI automation. Inherits conventions from doc-maintainer. Supports advisory, strict, auto-fix, and CI modes. |
 | product-advisor | Product Advisor | 1.1.0 | productivity | Product strategist agent for use case discovery, value prop analysis, feature prioritization, trade-offs, and risk mapping. Includes /brainstorm, /product-review, /use-cases, and /trade-offs skills. |
 | workflow-guard | Workflow Guard | 1.1.0 | devops | Workflow enforcement agent for managing PreToolUse/PostToolUse hook guards. Ships with a PR creation gate template. Use /guard to set up, list, or remove guards. |
-| rpi-workflow | RPI Workflow | 1.1.0 | productivity | Research-Plan-Implement workflow framework for structured software development. Provides 8 slash commands (/0-define-work through /7-complete-work) that guide work from definition through PR merge. |
+| rpi-workflow | RPI Workflow | 1.2.0 | productivity | Research-Plan-Implement workflow framework for structured software development. Provides 8 slash commands (/0-define-work through /7-complete-work) that guide work from definition through PR merge. All user dialogue uses the AskUserQuestion interview pattern; subagents propagate questions up via structured open_questions entries. |
 | component-advisor | Component Advisor | 1.1.0 | productivity | External component and library advisor. Discovers, evaluates, and recommends third-party packages that fit your architecture and existing dependency graph. |
 
 Use `/plugin show <id>` for detailed information about each plugin.

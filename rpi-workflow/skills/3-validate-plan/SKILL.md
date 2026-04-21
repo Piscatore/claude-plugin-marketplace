@@ -68,7 +68,18 @@ or follows the documented patterns.
 
 ### 6. Update Plan
 
-If issues found, update the plan with fixes.
+If issues found, update the plan with fixes. When a fix requires a user
+decision (e.g. "two ways to resolve the layer violation — which do you
+prefer?"), ask via `AskUserQuestion` rather than free-form prose. Batch
+up to 4 related fix-decisions per call.
+
+If validation is delegated to a subagent (e.g. a project-specific
+validator from `validation.patternChecks`), the subagent prompt MUST
+include the subagent propagation block from `agents/rpi-workflow.md`
+so the subagent returns structured `open_questions` instead of trying
+to talk to the user.
+
+
 Add a validation log entry at the bottom of the plan document:
 
 ```markdown

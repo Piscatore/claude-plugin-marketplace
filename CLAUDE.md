@@ -140,7 +140,7 @@ Use this when making changes:
 
 | shared/ | doc-maintainer | doc-pr-reviewer | product-advisor | workflow-guard | rpi-workflow | component-advisor |
 |---------|----------------|-----------------|-----------------|----------------|--------------|-------------------|
-| 2.0.0   | 1.14.0         | 1.3.0           | 1.1.0           | 1.1.0          | 1.1.0        | 1.1.0             |
+| 2.0.0   | 1.14.0         | 1.3.0           | 1.1.0           | 1.1.0          | 1.2.0        | 1.1.0             |
 
 Update this table when versions change.
 
