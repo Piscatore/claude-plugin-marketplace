@@ -40,6 +40,7 @@ This connects your Claude Code instance to the marketplace.
 | workflow-guard | Workflow Guard | 1.1.0 | devops | Workflow enforcement agent for managing PreToolUse/PostToolUse hook guards. Ships with a PR creation gate template. Use /guard to set up, list, or remove guards. |
 | rpi-workflow | RPI Workflow | 1.2.0 | productivity | Research-Plan-Implement workflow framework for structured software development. Provides 8 slash commands (/0-define-work through /7-complete-work) that guide work from definition through PR merge. All user dialogue uses the AskUserQuestion interview pattern; subagents propagate questions up via structured open_questions entries. |
 | component-advisor | Component Advisor | 1.1.0 | productivity | External component and library advisor. Discovers, evaluates, and recommends third-party packages that fit your architecture and existing dependency graph. |
+| hermes-tweet | Hermes Tweet | 0.1.6 | productivity | Native Hermes Agent plugin for X/Twitter automation with read tools and opt-in action tools. |
 
 Use `/plugin show <id>` for detailed information about each plugin.
 
@@ -324,5 +325,5 @@ See `CLAUDE.md` for detailed workflow and branch naming conventions.
 
 ## Version
 
-Marketplace Version: 1.4.0
-Last Updated: 2026-04-01
+Marketplace Version: 1.5.0
+Last Updated: 2026-06-14
