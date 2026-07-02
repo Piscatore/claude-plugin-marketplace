@@ -19,13 +19,12 @@ Read `.claude/rpi-config.json` if it exists. Extract:
 
 ### 2. Assess Current State
 
-```bash
-git branch --show-current
-git status -s
-git log --oneline -5
-{buildCommand}
-{testCommand}
-```
+Check git state by running
+`${CLAUDE_PLUGIN_ROOT}/scripts/git-state.ps1` (PowerShell) or
+`${CLAUDE_PLUGIN_ROOT}/scripts/git-state.sh` (bash) and parsing the JSON
+line it prints. Fall back to individual git commands only if the script
+fails. Run `{buildCommand}` and `{testCommand}` per the output-hygiene
+rule (quiet flags; never carry passing output into artifacts).
 
 Determine:
 - Which plan is being executed

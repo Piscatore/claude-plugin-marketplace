@@ -19,20 +19,23 @@ Read `.claude/rpi-config.json` if it exists. Extract:
 - `project.workingDirs` — artifact locations
 - `architecture.codePatterns` — patterns to follow during implementation
 
-Read these documents:
+Read only what this step needs:
 1. Plan from `{workingDirs.plans}/`
-2. Work brief from `{workingDirs.briefs}/` — for acceptance criteria
-3. Session file from `{workingDirs.sessions}/` — if resuming
+2. Work brief from `{workingDirs.briefs}/` — **Acceptance Criteria section only**
+3. Session file from `{workingDirs.sessions}/` — only if resuming
+
+Research doc: open on demand when a plan step's `file:line` pattern
+reference needs surrounding context — not read up front.
 
 If no plan exists, tell the user to run `/2-create-plan` first.
 
 ### 2. Check Git State
 
-```bash
-git branch --show-current
-git status -s
-git log --oneline -3
-```
+Check git state by running
+`${CLAUDE_PLUGIN_ROOT}/scripts/git-state.ps1` (PowerShell) or
+`${CLAUDE_PLUGIN_ROOT}/scripts/git-state.sh` (bash) and parsing the JSON
+line it prints. Fall back to individual git commands only if the script
+fails.
 
 **Gate conditions**:
 - [ ] On the correct feature branch (not `main`)
@@ -46,7 +49,8 @@ If on `main` or wrong branch, stop and ask the user.
 For each step in the plan:
 
 1. **Announce**: State which step you're executing and what it does
-2. **Read context**: Read any files the step depends on
+2. **Read context**: Read any files the step depends on — only the
+   files this step touches or references
 3. **Implement**: Make the code change following project patterns
    (use `architecture.codePatterns` from config if available)
 4. **Verify**: Run the build command
@@ -54,15 +58,12 @@ For each step in the plan:
 
 ### 4. Verification Gates
 
-After each phase, run the build command:
-```bash
-{buildCommand}
-```
-
-After all implementation is complete, run tests:
-```bash
-{testCommand}
-```
+Run `{buildCommand}` after each phase, and `{testCommand}` after all
+implementation is complete (configure both with quiet flags — see
+rpi-config.template.json). On failure, re-run with `{verboseBuildCommand}`
+(or raise verbosity) to diagnose. Never carry more than the actual error
+lines forward; do not paste restore logs, warnings summaries, or
+passing-test output into reports or artifacts.
 
 If a build or test fails:
 1. Read the error carefully

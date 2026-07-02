@@ -21,16 +21,19 @@ Read `.claude/rpi-config.json` if it exists. Extract:
 
 Read the most recent work brief from `{workingDirs.briefs}/`.
 If no brief exists, tell the user to run `/0-define-work` first.
+Only the brief and config are read here — referenced specs are read once
+and summarized into the research doc, not re-read downstream.
 
 Confirm understanding of the description, acceptance criteria, and scope.
 If any referenced specs or documents exist, read them now.
 
 ### 2. Check Git State
 
-```bash
-git branch --show-current
-git status -s
-```
+Check git state by running
+`${CLAUDE_PLUGIN_ROOT}/scripts/git-state.ps1` (PowerShell) or
+`${CLAUDE_PLUGIN_ROOT}/scripts/git-state.sh` (bash) and parsing the JSON
+line it prints. Fall back to individual git commands only if the script
+fails.
 
 Verify:
 - [ ] On the correct feature branch (not `main`)
@@ -38,65 +41,47 @@ Verify:
 
 ### 3. Identify Affected Subsystems
 
-**If config has `research.subsystems`**: Ask the user which subsystems
-are likely affected via `AskUserQuestion` with `multiSelect: true`:
+**If config has `research.subsystems`**: ask via `AskUserQuestion`,
+`multiSelect: true`, with options built from `config.research.subsystems`
+(label = subsystem name, description = subsystem description or path).
 
-```
-AskUserQuestion({
-  questions: [{
-    question: "Which subsystems are likely affected by this work?",
-    header: "Subsystems",
-    multiSelect: true,
-    options: config.research.subsystems.map(s => ({
-      label: s.name,
-      description: s.description || s.path
-    }))
-  }]
-})
-```
-
-**If no config**: Infer subsystems from the directory structure (`src/`,
+**If no config**: infer subsystems from the directory structure (`src/`,
 `lib/`, `app/`, `tests/`, schema files) and present the inferred list
-through the same `AskUserQuestion` pattern so the user can confirm or
-correct before research starts.
+through the same pattern so the user can confirm or correct before
+research starts.
 
-### 4. Launch Parallel Research Agents
+All user dialogue follows the shared interview pattern. Before the first
+`AskUserQuestion` call of a session, read
+`${CLAUDE_PLUGIN_ROOT}/references/interview-pattern.md`. Do not restate its
+rules here — batch questions, offer 2–4 concrete options, never ask what is
+already in context.
 
-**If config has `research.agents`**: Launch the configured agents in parallel.
+### 4. Launch Research (sized to the work)
 
-**If no custom agents**: Launch three generic research agents concurrently:
+Estimate the number of affected files from the brief and subsystem
+answers.
 
-**Agent 1 — File Locator**:
-Find all files related to the feature area. Map which files exist, which
-need modification, and where new files should be placed.
+- **Small (≤ `research.parallelThresholdFiles`, default 6, estimated
+  affected files)**: do the research inline in this context — locate
+  files, trace the closest analog, note conventions. No subagents.
+- **Large / unfamiliar**: launch up to `research.maxParallelAgents`
+  (default 3) subagents in parallel using the plugin's dedicated agent
+  definitions: `research-file-locator` (Haiku), `research-code-analyzer`
+  (Sonnet), `research-pattern-finder` (Sonnet). If config defines
+  `research.agents`, those take precedence.
 
-**Agent 2 — Code Analyzer**:
-Trace the data flow for similar existing features. Understand how the
-current code handles analogous operations end-to-end.
+Each subagent prompt contains: the work-brief summary (≤15 lines), the
+selected subsystem paths, the specific question that agent answers, and
+the subagent dialogue contract:
 
-**Agent 3 — Pattern Finder**:
-Find established patterns for the type of code being added. Collect
-templates and conventions that the new code must follow.
+> No user channel: do not ask the user anything. Return unknowns as entries
+> in an `open_questions` list in your final report — each entry: question,
+> header (≤12 chars), 2–4 options (label + one-line description), multiSelect
+> flag, optional recommended label, one-line rationale. The orchestrator will
+> consolidate and ask the user.
 
-**Subagent dialogue rule — propagate to every subagent prompt.**
-Every `Agent` call issued from this skill MUST include the propagation
-block defined in `agents/rpi-workflow.md` → "Subagent propagation rule".
-In short: subagents never call `AskUserQuestion` themselves — they
-return structured `open_questions` entries. This orchestrating skill
-consolidates questions from all three agents and presents them to the
-user in step 6.
-
-Concretely, each `Agent({ prompt })` call must include, near the top of
-the prompt:
-
-> You do not have a direct channel to the user. Do NOT attempt to ask
-> the user questions yourself. When you encounter an unknown, ambiguity,
-> or decision that requires user input, append a structured entry to an
-> `open_questions` section of your final report. See the rpi-workflow
-> agent spec for the exact shape (question, header, options with
-> label+description, multiSelect, recommended, rationale). The
-> orchestrating rpi-workflow agent will consolidate entries from all
-> subagents and ask the user via AskUserQuestion.
+Respect each agent's built-in tool and output budget — do not ask for
+"comprehensive" reports.
 
 ### 5. Synthesize Research
 
@@ -110,6 +95,12 @@ Combine findings into a research document covering:
 - **Risks**: Breaking changes, migration concerns, performance implications
 - **Open questions**: Anything not resolved by reading code
 
+Record findings as `file:line` references plus a one-sentence description
+of the pattern or behavior. Include a code excerpt only when a reference
+alone would be ambiguous, and cap excerpts at 5 lines. Downstream steps
+read the actual code on demand — references are more precise than
+possibly-stale snippets and cost a fraction of the tokens.
+
 ### 6. CLARIFICATION GATE (Interview)
 
 **Before saving the research, consolidate and ask the user.** Merge the
@@ -118,59 +109,12 @@ list, deduplicate near-identical questions, and add any assumptions /
 risks this skill itself is unsure about.
 
 **Present via `AskUserQuestion`, batched 1–4 per call, ordered by
-dependency and impact.** Each consolidated question must include:
-
-- a concrete question text,
-- a ≤12-char `header`,
-- 2–4 mutually exclusive `options` (or `multiSelect: true` when genuinely
-  non-exclusive — e.g. "which of these files are in scope?"),
-- one option marked `(Recommended)` if the research points clearly to a
-  preferred answer, based on the `recommended` hint from the subagent,
-- `preview` content when options are code snippets / pattern examples
-  that the user should visually compare.
-
-**Pseudo-example** of consolidating three subagent returns into one call:
-
-```
-// subagent returns (open_questions):
-//   file-locator  → "Is legacy adapter X in scope?"
-//   code-analyzer → "Which existing handler's pattern should we follow?"
-//   pattern-finder→ "DI via factory or constructor?"
-AskUserQuestion({
-  questions: [
-    {
-      question: "Is legacy adapter X in scope for this change?",
-      header: "Scope: X",
-      multiSelect: false,
-      options: [
-        { label: "In scope",               description: "Update X as part of this work item" },
-        { label: "Out of scope (follow-up)",description: "Defer X to a later work item" }
-      ]
-    },
-    {
-      question: "Which existing handler's pattern should we follow?",
-      header: "Pattern",
-      multiSelect: false,
-      options: [
-        { label: "HandlerA (Recommended)", description: "Closest analog — used for similar events", preview: "// HandlerA.cs excerpt…" },
-        { label: "HandlerB",               description: "Newer style but different lifecycle",       preview: "// HandlerB.cs excerpt…" }
-      ]
-    },
-    {
-      question: "How should the new service be wired?",
-      header: "DI style",
-      multiSelect: false,
-      options: [
-        { label: "Constructor injection (Recommended)", description: "Matches current DI pattern" },
-        { label: "Factory",                             description: "Only if lifetime is per-request" }
-      ]
-    }
-  ]
-})
-```
-
-If more than 4 questions come back, issue additional `AskUserQuestion`
-calls in dependency order (earlier answers may change later options).
+dependency and impact**, per `references/interview-pattern.md`. Carry
+over each subagent's `recommended` hint as the `(Recommended)` option,
+and attach `preview` content when options are code/pattern snippets the
+user should visually compare. If more than 4 questions come back, issue
+additional calls in dependency order (earlier answers may change later
+options).
 
 **Incorporate answers** into the research document before saving. If
 answers change scope, update the work brief as well.
@@ -182,8 +126,9 @@ Write the research document to `{workingDirs.research}/{feature-slug}-research.m
 Include:
 - Link back to the work brief
 - Timestamp and feature description
-- All file references with line numbers
-- Code snippets showing existing patterns to follow
+- All file references with line numbers, one-sentence description per
+  finding (see step 5's format rule) — no pasted code beyond ambiguous
+  5-line excerpts
 - Resolved questions (with the user's answers)
 - Any remaining unknowns (to be resolved in planning)
 

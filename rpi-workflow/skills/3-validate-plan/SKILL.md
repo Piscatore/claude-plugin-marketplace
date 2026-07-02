@@ -14,18 +14,19 @@ This is an optional but recommended step of the RPI workflow.
 ### 1. Load Context
 
 Read `.claude/rpi-config.json` if it exists. Extract:
-- `architecture.layers` — for dependency order validation
-- `architecture.codePatterns` — for pattern compliance
-- `architecture.styleRules` — for code style checks
-- `validation.structuralChecks` — project-specific structural rules
-- `validation.patternChecks` — project-specific pattern rules
+`architecture.layers`, `architecture.codePatterns`, `architecture.styleRules`,
+`validation.structuralChecks`, `validation.patternChecks`.
 
 Read the most recent plan from `{workingDirs.plans}/`.
 If no plan exists, tell the user to run `/2-create-plan` first.
+Open the research doc or referenced code files only when a specific
+check below requires confirmation — not by default.
 
 ### 2. Structural Validation
 
-**If config has `validation.structuralChecks`**: Run each configured check.
+If config has `validation.structuralChecks`, run each configured check.
+If config has `architecture.layers`, verify each plan step is assigned
+to the correct layer and no step depends on a later layer.
 
 **Always check these universal rules:**
 - [ ] **Dependency order**: Changes respect the layer dependency flow
@@ -33,17 +34,12 @@ If no plan exists, tell the user to run `/2-create-plan` first.
 - [ ] **Registration**: Every new service/component has a wiring step
 - [ ] **Schema sync**: Data model changes match code model properties
 
-**If config has `architecture.layers`**: Verify that each plan step is
-assigned to the correct layer and that no step depends on a later layer.
-
 ### 3. Pattern Compliance
 
-**If config has `validation.patternChecks`**: Verify each step follows
-the configured patterns. For each check, read the relevant existing code
-to confirm the plan matches.
-
-**If config has `architecture.codePatterns`**: Verify each step references
-or follows the documented patterns.
+If config has `validation.patternChecks`, verify each step follows the
+configured patterns (read the relevant existing code to confirm). If
+config has `architecture.codePatterns`, verify each step references or
+follows the documented patterns.
 
 **Always check:**
 - [ ] **Code style**: Consistent with existing codebase conventions
@@ -69,16 +65,14 @@ or follows the documented patterns.
 ### 6. Update Plan
 
 If issues found, update the plan with fixes. When a fix requires a user
-decision (e.g. "two ways to resolve the layer violation — which do you
-prefer?"), ask via `AskUserQuestion` rather than free-form prose. Batch
-up to 4 related fix-decisions per call.
+decision, ask via `AskUserQuestion` per the shared interview pattern
+(`${CLAUDE_PLUGIN_ROOT}/references/interview-pattern.md`), batched up to
+4 related fix-decisions per call.
 
-If validation is delegated to a subagent (e.g. a project-specific
-validator from `validation.patternChecks`), the subagent prompt MUST
-include the subagent propagation block from `agents/rpi-workflow.md`
-so the subagent returns structured `open_questions` instead of trying
-to talk to the user.
-
+Subagents delegated to (e.g. a project-specific validator from
+`validation.patternChecks`) MUST get the subagent dialogue contract from
+`references/interview-pattern.md` so they return `open_questions`
+instead of talking to the user directly.
 
 Add a validation log entry at the bottom of the plan document:
 
