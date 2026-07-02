@@ -5,7 +5,7 @@
     "email": "plugins@example.com"
   },
   "metadata": {
-    "version": "1.4.0",
+    "version": "1.5.0",
     "description": "Curated collection of specialized agent plugins for Claude Code"
   },
   "plugins": [
@@ -79,6 +79,20 @@
         "email": "plugins@example.com"
       },
       "keywords": ["components", "libraries", "dependencies", "nuget", "npm", "evaluation", "security", "design"],
+      "strict": false
+    },
+    {
+      "name": "hermes-tweet",
+      "source": {
+        "source": "github",
+        "repo": "Xquik-dev/hermes-tweet"
+      },
+      "description": "Native Hermes Agent plugin for X/Twitter automation with read tools and opt-in action tools.",
+      "version": "0.1.6",
+      "author": {
+        "name": "Xquik"
+      },
+      "keywords": ["hermes-agent", "twitter", "x", "social-media", "automation"],
       "strict": false
     }
   ]
