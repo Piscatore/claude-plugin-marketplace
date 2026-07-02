@@ -13,27 +13,24 @@ Create a detailed, step-by-step implementation plan based on research.
 ### 1. Load Context
 
 Read `.claude/rpi-config.json` if it exists. Extract:
-- `project.workingDirs` — artifact locations
-- `project.buildCommand` / `project.testCommand` — verification commands
-- `architecture.layers` — project layers and dependency order
-- `architecture.dependencyFlow` — how changes must be ordered
-- `architecture.codePatterns` — patterns new code must follow
+- `project.workingDirs`, `project.buildCommand` / `project.testCommand`
+- `architecture.layers`, `architecture.dependencyFlow`, `architecture.codePatterns`
 
-Read these documents in order:
-1. Work brief from `{workingDirs.briefs}/` — for scope and acceptance criteria
-2. Research document from `{workingDirs.research}/` — for technical findings
+Read only what this step needs: the work brief's **Acceptance Criteria**
+and **Scope Boundaries** sections, and the research document. Do NOT
+re-read specs already summarized into the research doc.
 
 If no research exists and the work is non-trivial, suggest `/1-research-codebase`.
 For simple changes, research can be skipped.
 
 ### 2. Check Git State
 
-```bash
-git branch --show-current
-git status -s
-```
-
-Verify we're on the correct feature branch with no unexpected changes.
+Check git state by running
+`${CLAUDE_PLUGIN_ROOT}/scripts/git-state.ps1` (PowerShell) or
+`${CLAUDE_PLUGIN_ROOT}/scripts/git-state.sh` (bash) and parsing the JSON
+line it prints. Fall back to individual git commands only if the script
+fails. Verify we're on the correct feature branch with no unexpected
+changes.
 
 ### 3. Design the Implementation
 
@@ -42,8 +39,7 @@ the configured layers, respecting `dependsOn` ordering. Each layer becomes
 a phase with a build checkpoint after it.
 
 **If no config**: Organize work into logical phases based on the project
-structure discovered during research. Order changes so that dependencies
-are satisfied before dependents.
+structure from research, ordering dependencies before dependents.
 
 For each phase:
 - What files to create or modify
@@ -53,65 +49,29 @@ For each phase:
 
 ### 4. CLARIFICATION GATE (Interview)
 
-**Before finalizing the plan, conduct a structured interview via
-`AskUserQuestion`.** Group questions into three categories — design,
-scope, and risk trade-offs — and ask each as a concrete multiple-choice
-question. Do NOT present these as a free-form list.
+All user dialogue follows the shared interview pattern (read
+`${CLAUDE_PLUGIN_ROOT}/references/interview-pattern.md` before the first
+`AskUserQuestion` call of a session — batch questions, 2–4 concrete
+options, never ask what is already in context).
 
-For **design decisions**, prefer `preview` content so the user can
-visually compare the two approaches:
+**Before finalizing the plan, conduct a structured interview.** Group
+questions into three categories, each a concrete multiple-choice
+question — never a free-form list:
 
-```
-AskUserQuestion({
-  questions: [{
-    question: "Should X be implemented with pattern A or pattern B?",
-    header: "Pattern",
-    multiSelect: false,
-    options: [
-      {
-        label: "Pattern A (Recommended)",
-        description: "Matches existing code in HandlerA; simpler to review",
-        preview: "// Pattern A — example\nclass Thing : IThing {\n  public Thing(IDep dep) { … }\n}"
-      },
-      {
-        label: "Pattern B",
-        description: "Newer style; more flexible but diverges from codebase",
-        preview: "// Pattern B — example\nclass Thing : IThing {\n  public static Thing Create(IDep dep) => …\n}"
-      }
-    ]
-  }]
-})
-```
-
-For **scope questions**, use single-select In-scope / Out-of-scope /
-Not-applicable options (same shape as `/0-define-work` batch 3).
-
-For **risk trade-offs**, phrase the question as a concrete choice, not
-an open "what do you think":
-
-```
-AskUserQuestion({
-  questions: [{
-    question: "This approach changes the signature of IFoo.Bar(). Which trade-off do you accept?",
-    header: "Breaking?",
-    multiSelect: false,
-    options: [
-      { label: "Break and update callers", description: "Cleaner end state; requires touching {N} callers" },
-      { label: "Add overload, keep old",   description: "Backward compatible; leaves dead code until cleanup" }
-    ]
-  }]
-})
-```
+- **Design decisions**: which of two (or more) approaches to take; use
+  `preview` content (code snippets) so the user can visually compare.
+- **Scope questions**: single-select In-scope / Out-of-scope /
+  Not-applicable per candidate area.
+- **Risk trade-offs**: a concrete choice between consequences (e.g.
+  "break callers" vs "add overload"), never an open "what do you think".
 
 **Batch up to 4 related questions per call.** If more than 4 questions
 are open, ask them in sequential `AskUserQuestion` calls ordered by
 dependency. Incorporate every answer into the plan before step 5.
 
-**Subagent propagation**: if this skill delegates any research or
-comparison step to a subagent, include the propagation block from
-`agents/rpi-workflow.md` in the subagent prompt. Subagents return
-structured `open_questions`; this skill consolidates them into the
-`AskUserQuestion` calls above.
+**Subagent dialogue**: delegated research/comparison steps must include
+the subagent dialogue contract from `references/interview-pattern.md`;
+consolidate returned `open_questions` into the calls above.
 
 ### 5. Write the Plan
 
@@ -119,7 +79,7 @@ For each step, specify:
 - **File**: Exact path to create or modify
 - **Action**: Create / Modify / Delete
 - **What**: Precise description of the change
-- **Pattern**: Reference to existing code that demonstrates the pattern
+- **Pattern**: `file:line` reference only — never paste the pattern code into the plan
 - **Dependencies**: Which prior steps must complete first
 - **Verification**: How to confirm the step is correct
 

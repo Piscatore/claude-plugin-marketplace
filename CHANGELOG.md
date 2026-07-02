@@ -17,6 +17,18 @@ For per-component version history, see the Version section in each agent spec:
 
 ## [Unreleased]
 
+## 2026-07-02
+
+### rpi-workflow v1.3.0
+- Model-tiered research subagents with output budgets: File Locator (Haiku, search-only), Code Analyzer (Sonnet), Pattern Finder (Sonnet) — replaces three unbounded generic agents on the default model
+- Research sizing gate: small work items (≤ `research.parallelThresholdFiles`, default 6 files) research inline instead of always launching subagents
+- Shared `references/interview-pattern.md` reference — removes duplicated `AskUserQuestion` JSON examples and the subagent propagation block from the agent spec and every skill
+- Research artifacts now record `file:line` references with a one-sentence description instead of pasted code snippets that get re-read (and re-paid for) downstream
+- Per-skill context diet: each skill reads only the brief/research/plan/session sections the step actually needs
+- `scripts/git-state.ps1` / `git-state.sh` — single JSON-line git state check replacing 4-5 separate git commands per step
+- Quiet build/test defaults (`--nologo -v q`) with a `verboseBuildCommand` fallback for diagnosing failures — keeps passing output and restore logs out of context
+- Agent spec and all eight `SKILL.md` files slimmed toward line-count targets; cross-plugin registry now consulted only when delegating, not read proactively every session
+
 ## 2026-04-01
 
 ### rpi-workflow v1.0.0 (New Plugin)

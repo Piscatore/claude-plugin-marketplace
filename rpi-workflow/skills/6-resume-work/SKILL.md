@@ -19,76 +19,44 @@ Read `.claude/rpi-config.json` if it exists. Extract:
 
 ### 2. Check Git State First
 
-Before loading any context, verify the working environment:
+Before loading any context, verify the working environment. Check git
+state by running `${CLAUDE_PLUGIN_ROOT}/scripts/git-state.ps1 -Fetch`
+(PowerShell) or `${CLAUDE_PLUGIN_ROOT}/scripts/git-state.sh --fetch`
+(bash) and parsing the JSON line it prints. Fall back to individual git
+commands only if the script fails.
 
-```bash
-git branch --show-current
-git status -s
-git log --oneline -5
-git stash list
-```
-
-**Diagnose and report**:
+**Diagnose and report** (fields map directly to the script's JSON):
 
 | Condition | Action |
 |-----------|--------|
 | On `main` with no feature branches | No work in progress — suggest `/0-define-work` |
-| On `main` with uncommitted changes | Dangerous — interview user via `AskUserQuestion` |
-| On a feature branch, clean | Good — proceed to load session |
+| On `main` with uncommitted changes (`dirty` > 0) | Dangerous — interview user via `AskUserQuestion` |
+| On a feature branch, clean (`dirty` = 0) | Good — proceed to load session |
 | On a feature branch, dirty | Uncommitted work — interview: commit, stash, or discard? |
-| Stashed changes exist | Alert user via `AskUserQuestion` — may be forgotten work |
+| `stash` > 0 | Alert user via `AskUserQuestion` — may be forgotten work |
+| `ahead`/`behind` nonzero | Diverged from remote — alert user |
 
-When a condition requires user input, ask through `AskUserQuestion` with
-concrete options. Example for the "feature branch, dirty" case:
-
-```
-AskUserQuestion({
-  questions: [{
-    question: "Branch '{branch}' has {N} uncommitted changes. How do you want to handle them before resuming?",
-    header: "Dirty state",
-    multiSelect: false,
-    options: [
-      { label: "Commit now (Recommended)", description: "wip commit with a resume-marker message, then continue" },
-      { label: "Stash",                    description: "git stash; pop before resuming implementation" },
-      { label: "Discard",                  description: "git checkout -- .; lose the uncommitted work" }
-    ]
-  }]
-})
-```
+When a condition requires user input, ask through `AskUserQuestion` per
+the shared interview pattern (`${CLAUDE_PLUGIN_ROOT}/references/interview-pattern.md`).
 
 **Do not proceed until the branch state is clean and understood.**
 
 ### 3. Find Sessions
 
-List session files in `{workingDirs.sessions}/`.
-If only one exists, load it automatically. If multiple exist, ask via
-`AskUserQuestion`:
-
-```
-AskUserQuestion({
-  questions: [{
-    question: "Which session do you want to resume?",
-    header: "Session",
-    multiSelect: false,
-    options: sessions.map(s => ({
-      label: s.featureSlug,
-      description: `${s.status} · updated ${s.lastUpdated} · ${s.currentStep}`
-    }))
-  }]
-})
-```
+List session files in `{workingDirs.sessions}/`. If only one exists,
+load it automatically. If multiple exist, ask which to resume via
+`AskUserQuestion` (label = feature slug, description = status · updated
+· current step).
 
 If no session files exist, check for briefs and plans — the user may
 have gotten partway through the workflow without saving a session.
 
 ### 4. Restore Context
 
-From the session file:
-1. Read the linked work brief
-2. Read the linked plan
-3. Read the linked research (if it exists)
-4. Identify current step and status
-5. Check for noted blockers or decisions
+Lazy-load: read the session file first. Read the linked brief and plan
+only if the session file's summary is insufficient to continue; open
+the linked research doc only on demand. Identify current step and
+status, and check for noted blockers or decisions.
 
 ### 5. Verify Code Matches Session
 
@@ -102,17 +70,7 @@ Check:
 - Does the project still build?
 - Do tests still pass?
 
-### 6. Check Remote Sync
-
-```bash
-git fetch origin
-git log HEAD..origin/{branch} --oneline
-git log origin/{branch}..HEAD --oneline
-```
-
-Report commits ahead/behind. If diverged, alert user.
-
-### 7. Resume Execution
+### 6. Resume Execution
 
 Once context is restored and state is verified:
 1. Announce the current step and what remains

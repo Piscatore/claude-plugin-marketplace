@@ -19,12 +19,13 @@ Read `.claude/rpi-config.json` if it exists. Extract:
 
 ### 2. Pre-flight Checks
 
-```bash
-git branch --show-current
-git status -s
-{buildCommand}
-{testCommand}
-```
+Check git state by running
+`${CLAUDE_PLUGIN_ROOT}/scripts/git-state.ps1 -Fetch` (PowerShell) or
+`${CLAUDE_PLUGIN_ROOT}/scripts/git-state.sh --fetch` (bash) and parsing
+the JSON line it prints. Fall back to individual git commands only if
+the script fails. Run `{buildCommand}` / `{testCommand}` with quiet
+flags; on failure re-run verbose to diagnose, and never carry passing
+output into the PR body.
 
 **Gate conditions** (all must pass before creating the PR):
 - [ ] On the feature branch (not `main`)
@@ -46,23 +47,10 @@ Walk through each acceptance criterion:
 - [ ] Criterion 3: {NOT MET — explain}
 ```
 
-If any are not met, ask the user via `AskUserQuestion`. Batch one
-question per unmet criterion (up to 4 per call):
-
-```
-AskUserQuestion({
-  questions: unmet.map(c => ({
-    question: `"${c.text}" is not satisfied. How do you want to handle it?`,
-    header: "Unmet AC",
-    multiSelect: false,
-    options: [
-      { label: "Defer to follow-up",      description: "Open a follow-up work item; PR proceeds without it" },
-      { label: "Implement now",           description: "Stay on this branch and complete it before PR" },
-      { label: "Drop from acceptance",    description: "Remove this criterion from the brief (was wrong)" }
-    ]
-  }))
-})
-```
+If any are not met, ask the user via `AskUserQuestion` per the shared
+interview pattern (`${CLAUDE_PLUGIN_ROOT}/references/interview-pattern.md`),
+one question per unmet criterion (up to 4 per call), options: Defer to
+follow-up / Implement now / Drop from acceptance.
 
 ### 4. Review the Diff
 
@@ -100,33 +88,9 @@ EOF
 
 ### 6. Merge Decision
 
-Ask the user via `AskUserQuestion`. Offer the PR body as a `preview` on
-the "Merge now" option so the user sees exactly what will land:
-
-```
-AskUserQuestion({
-  questions: [{
-    question: "PR #{N} is open. How do you want to proceed?",
-    header: "Merge now?",
-    multiSelect: false,
-    options: [
-      {
-        label: "Wait for review (Recommended)",
-        description: "Report PR URL and stop — reviewers take over"
-      },
-      {
-        label: "Squash-merge now",
-        description: "gh pr merge --squash --delete-branch and run post-merge cleanup",
-        preview: "{PR body preview}"
-      },
-      {
-        label: "Merge commit now",
-        description: "gh pr merge --merge --delete-branch (preserves commit history)"
-      }
-    ]
-  }]
-})
-```
+Ask via `AskUserQuestion`: Wait for review (Recommended) / Squash-merge
+now / Merge commit now — attach the PR body as `preview` on the merge
+options so the user sees exactly what will land.
 
 **If merge now**: run the chosen `gh pr merge` variant and proceed to
 step 7. **If wait**: report the PR URL and stop.

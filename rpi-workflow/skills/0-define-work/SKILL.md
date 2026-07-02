@@ -21,134 +21,43 @@ Read `.claude/rpi-config.json` if it exists. Extract:
 
 ### 2. Check Git State
 
-```bash
-git status
-git branch --show-current
-```
+Check git state by running
+`${CLAUDE_PLUGIN_ROOT}/scripts/git-state.ps1` (PowerShell) or
+`${CLAUDE_PLUGIN_ROOT}/scripts/git-state.sh` (bash) and parsing the JSON
+line it prints. Fall back to individual git commands only if the script
+fails.
 
 **Gate conditions**:
 - [ ] No uncommitted changes on the current branch
 - [ ] Not on `main` — if on main, that's expected (we'll create a branch)
 - [ ] If on a feature branch, confirm: resume existing work or start fresh?
 
-If any gate condition is unresolved, ask the user via `AskUserQuestion`.
-Example for the "on a feature branch" case:
-
-```
-AskUserQuestion({
-  questions: [{
-    question: "You're on feature branch '{branch}' with {N} uncommitted changes. How do you want to proceed?",
-    header: "Branch state",
-    multiSelect: false,
-    options: [
-      { label: "Resume this work (Recommended)", description: "Keep this branch and changes, skip the new brief" },
-      { label: "Stash and start fresh",          description: "git stash, then create a new feature branch from main" },
-      { label: "Commit, then start fresh",       description: "Commit the current work, then branch off main for new work" }
-    ]
-  }]
-})
-```
+If any gate condition is unresolved, ask the user via `AskUserQuestion`
+(see step 3 for the interview reference).
 
 ### 3. Gather the Work Brief (Interview)
 
-Collect the four pieces of the brief — **Description**, **Acceptance
-Criteria**, **Scope Boundaries**, **References** — through one or more
-`AskUserQuestion` calls. Do NOT write a free-form "please answer these
-questions" block; the tool is the interview channel.
+All user dialogue follows the shared interview pattern. Before the first
+`AskUserQuestion` call of a session, read
+`${CLAUDE_PLUGIN_ROOT}/references/interview-pattern.md`. Do not restate its
+rules here — batch questions, offer 2–4 concrete options, never ask what is
+already in context.
 
-**First pass** — read any linked spec or document the user has already
-pointed at (brief request, GitHub issue URL, etc.) before asking
-anything, so options can be pre-populated with concrete, recommended
-choices instead of open-ended prompts.
+First read any spec/issue/document the user has already pointed at, and
+pre-populate options from it. Then conduct the interview in **at most two
+AskUserQuestion calls**:
 
-**Interview batch 1 — Description & source of truth** (one call):
+- **Call 1 (always, ≤4 questions)**: change type (Feature/Fix/Refactor/
+  Chore) · source document (yes-will-share / define-here) · how "done"
+  is verifiable (multiSelect: test/build/manual/endpoint) · plus the
+  branch-state question if git state was unresolved.
+- **Call 2 (only if needed, ≤4 questions)**: scope boundaries per
+  candidate area (In scope / Out of scope / N/A) and confirmation of
+  drafted acceptance criteria (each option = one draft criterion).
 
-```
-AskUserQuestion({
-  questions: [
-    {
-      question: "What kind of change is this?",
-      header: "Change type",
-      multiSelect: false,
-      options: [
-        { label: "Feature",  description: "New user-facing capability or behavior" },
-        { label: "Fix",      description: "Bug fix, incorrect behavior, or regression" },
-        { label: "Refactor", description: "Internal restructuring with no behavior change" },
-        { label: "Chore",    description: "Tooling, deps, build, or docs only" }
-      ]
-    },
-    {
-      question: "Is there an existing spec, issue, or document that describes the work?",
-      header: "Source doc",
-      multiSelect: false,
-      options: [
-        { label: "Yes — I'll share the path/URL",        description: "You'll paste a path or URL; I'll read it before continuing" },
-        { label: "No — we'll define it in this session", description: "We'll build the description together through this interview" }
-      ]
-    }
-  ]
-})
-```
-
-If the user answered "Yes", follow up with a free-text "Other" answer
-(the user supplies the path/URL) via a second `AskUserQuestion` call, or
-— if the path/URL is already in the conversation — read it now and skip
-ahead.
-
-**Interview batch 2 — Acceptance criteria shape**:
-
-```
-AskUserQuestion({
-  questions: [{
-    question: "How should 'done' be verifiable?",
-    header: "Verifiable by",
-    multiSelect: true,
-    options: [
-      { label: "Automated test passes",  description: "A new or existing test exercises the behavior" },
-      { label: "Build succeeds",         description: "Static/type/build checks confirm the change" },
-      { label: "Manual UI/CLI check",    description: "Human verification of observable output" },
-      { label: "External endpoint call", description: "API/endpoint returns the expected response" }
-    ]
-  }]
-})
-```
-
-Use the selected categories to structure concrete criteria. For each
-selected category, draft 1–3 specific criteria and confirm them with a
-single follow-up `AskUserQuestion` where each option is a draft
-criterion (user edits via "Other" if wrong).
-
-**Interview batch 3 — Scope boundaries** (up to 4 related questions in
-one call):
-
-```
-AskUserQuestion({
-  questions: [
-    {
-      question: "Is related area X in scope?",
-      header: "Scope: X",
-      multiSelect: false,
-      options: [
-        { label: "In scope",                description: "Covered by this work item" },
-        { label: "Out of scope (follow-up)",description: "Defer to a later work item" },
-        { label: "Not applicable",          description: "Unrelated — ignore" }
-      ]
-    }
-    // Repeat per candidate scope area identified from the spec/issue.
-  ]
-})
-```
-
-**Interview batch 4 — References** — only ask if not already collected
-in batch 1. Use `AskUserQuestion` with a single `multiSelect: true`
-question listing candidate reference types (spec doc, related issue,
-prior PR, similar code path, external API doc) and let the user tick
-each applicable one via "Other" free-text.
-
-**Do not proceed to step 4 until every brief section has at least one
-concrete answer.** If a follow-up is needed because an answer was too
-thin, issue another `AskUserQuestion` call — never revert to free-form
-prose prompts.
+Do not proceed to step 4 until every brief section has at least one
+concrete answer; follow up with another call only for genuinely thin
+answers.
 
 ### 4. Save the Work Brief
 

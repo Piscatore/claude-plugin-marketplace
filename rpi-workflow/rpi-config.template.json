@@ -4,8 +4,9 @@
   "project": {
     "name": "My Project",
     "description": "Brief description of the project",
-    "buildCommand": "dotnet build",
-    "testCommand": "dotnet test",
+    "buildCommand": "dotnet build --nologo -v q",
+    "testCommand": "dotnet test --nologo -v q",
+    "verboseBuildCommand": "dotnet build",
     "branchPrefix": "",
     "workingDirs": {
       "briefs": "thoughts/shared/work",
@@ -64,6 +65,8 @@
 
   "research": {
     "agents": [],
+    "maxParallelAgents": 3,
+    "parallelThresholdFiles": 6,
     "subsystems": [
       {
         "name": "Models",
