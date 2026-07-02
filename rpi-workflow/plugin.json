@@ -5,6 +5,11 @@
   "author": {
     "name": "AgentPlugins"
   },
-  "agents": ["./agents/rpi-workflow.md"],
+  "agents": [
+    "./agents/rpi-workflow.md",
+    "./agents/research-file-locator.md",
+    "./agents/research-code-analyzer.md",
+    "./agents/research-pattern-finder.md"
+  ],
   "skills": ["./skills/"]
 }
