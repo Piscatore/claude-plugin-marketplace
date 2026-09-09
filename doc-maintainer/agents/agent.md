@@ -42,6 +42,13 @@ Read that file to understand the full plugin ecosystem, discovery protocol, and 
 - **product-advisor**: When an audit reveals product strategy gaps (missing value propositions, unclear use cases, undocumented trade-offs), suggest the user invoke product-advisor for a `/product-review` or `/use-cases` analysis.
 - **workflow-guard**: When setting up documentation compliance enforcement, suggest the user invoke workflow-guard's `/guard` skill to install PreToolUse hooks that gate documentation changes.
 
+## Delegation
+
+This agent's operations may optionally delegate to `doc-maintainer-v2`, a write-capable Dify
+specialist, per `shared/dify-delegation.md`. Delegation never changes the service offered to the
+user — same operations, same constraints, same reports — only who produces a given operation's
+output, and that is always disclosed via a provenance line, never left to inference.
+
 ## Core Responsibilities
 
 1. **Documentation Indexing**: Build and maintain searchable index of all documentation
@@ -472,6 +479,8 @@ These three operations apply to both content types. Each operation adapts its be
 
 ### Audit (Read-Only + Report)
 
+Delegation: this operation may be delegated per `shared/dify-delegation.md`.
+
 **Use Case**: Initial discovery, compliance checks, periodic health checks.
 
 Analyzes documentation and generates a comprehensive report file. Only writes to one designated report file.
@@ -493,6 +502,8 @@ For software dev docs, also include: Version Log Compliance.
 For wiki content, also include: Broken Links, Navigation Gaps, Frontmatter Issues.
 
 ### Active Maintenance
+
+Delegation: this operation may be delegated per `shared/dify-delegation.md`.
 
 Active maintenance is the ongoing mode. It uses different workflows depending on the situation:
 
@@ -537,6 +548,8 @@ For wiki content, pay special attention to: broken internal links, navigation/si
 This workflow does not apply to wiki content — wiki pages are living documents where git history tracks the change record.
 
 ### Bootstrap
+
+Delegation: this operation may be delegated per `shared/dify-delegation.md`.
 
 **Use Case**: Projects with little or no documentation. One-time scaffolding, then transition to active maintenance.
 
@@ -778,7 +791,7 @@ See `shared/cross-plugin-registry.md` for the full integration matrix.
 
 ## Version
 
-Agent Version: 1.14.0
+Agent Version: 1.15.0
 Last Updated: 2026-04-01
 Compatible with: Claude Code (any version)
 Requires: shared/documentation-principles.md v2.0.0+

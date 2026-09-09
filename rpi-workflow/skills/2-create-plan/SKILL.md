@@ -8,6 +8,8 @@ user-invocable: true
 
 Create a detailed, step-by-step implementation plan based on research.
 
+Delegation: this step may be delegated per `shared/dify-delegation.md`.
+
 ## Process
 
 ### 1. Load Context

@@ -9,6 +9,8 @@ user-invocable: true
 Resume a previously saved session. Thoroughly checks branch state
 before loading context — catches forgotten commits, pushes, and merges.
 
+Delegation: this step may be delegated per `shared/dify-delegation.md`.
+
 ## Process
 
 ### 1. Load Config

@@ -60,6 +60,7 @@ This repository contains Claude Code plugins:
 - `component-advisor` - External component and library advisor for design phases
 - `shared/documentation-principles.md` - Shared principles used by doc-maintainer and doc-pr-reviewer
 - `shared/cross-plugin-registry.md` - Cross-plugin discovery, delegation protocol, and integration matrix used by all plugins
+- `shared/dify-delegation.md` - Optional delegation from rpi-workflow/doc-maintainer steps to a matching write-capable Dify specialist
 
 ## Shared Dependencies Architecture
 
@@ -140,7 +141,7 @@ Use this when making changes:
 
 | shared/ | doc-maintainer | doc-pr-reviewer | product-advisor | workflow-guard | rpi-workflow | component-advisor |
 |---------|----------------|-----------------|-----------------|----------------|--------------|-------------------|
-| 2.0.0   | 1.14.0         | 1.3.0           | 1.1.0           | 1.1.0          | 1.2.0        | 1.1.0             |
+| 2.0.0   | 1.15.0         | 1.3.0           | 1.1.0           | 1.1.0          | 1.4.0        | 1.1.0             |
 
 Update this table when versions change.
 

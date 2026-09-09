@@ -10,6 +10,8 @@ Define the work item before starting implementation. This is the entry
 point of the RPI workflow — a structured dialogue that clarifies what
 needs to be done before any code is touched.
 
+Delegation: this step may be delegated per `shared/dify-delegation.md`.
+
 ## Process
 
 ### 1. Load Config

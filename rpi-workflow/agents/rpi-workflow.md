@@ -100,9 +100,16 @@ proactively every session.
 - **product-advisor**: During `/0-define-work`, when requirements are unclear or the feature scope is ambiguous, suggest `/use-cases` or `/brainstorm` for structured analysis.
 - **workflow-guard**: During `/7-complete-work`, if no PR gate hook exists, suggest `/guard setup` to install enforcement before PR creation.
 
+## Delegation
+
+This agent's steps may optionally delegate to `rpi-workflow-v2`, a write-capable Dify
+specialist, per `shared/dify-delegation.md`. Delegation never changes the service offered to the
+user — same steps, same gates, same artifacts — only who produces a given step's output, and
+that is always disclosed via a provenance line, never left to inference.
+
 ## Version
 
-Agent Version: 1.3.0
+Agent Version: 1.4.0
 Last Updated: 2026-07-02
 Compatible with: Claude Code (any version)
 Optional integration: doc-maintainer v1.14.0+, component-advisor v1.1.0+, product-advisor v1.1.0+, workflow-guard v1.1.0+

@@ -9,6 +9,8 @@ user-invocable: true
 Save the current session state so work can be resumed later.
 Use when stopping mid-implementation or pausing for the day.
 
+Delegation: this step may be delegated per `shared/dify-delegation.md`.
+
 ## Process
 
 ### 1. Load Config
