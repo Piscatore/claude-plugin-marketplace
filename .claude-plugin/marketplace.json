@@ -13,7 +13,7 @@
       "name": "doc-maintainer",
       "source": "./doc-maintainer",
       "description": "Specialized agent for documentation auditing, maintenance, and bootstrapping. Supports software dev docs and wiki content types with audit, active, and bootstrap operations.",
-      "version": "1.14.0",
+      "version": "1.15.0",
       "author": {
         "name": "AgentPlugins",
         "email": "plugins@example.com"
@@ -61,7 +61,7 @@
       "name": "rpi-workflow",
       "source": "./rpi-workflow",
       "description": "Research-Plan-Implement workflow framework for structured software development. Provides 8 slash commands (/0_define_work through /7_complete_work) that guide work from definition through PR merge. Configurable per-project via .claude/rpi-config.json.",
-      "version": "1.2.0",
+      "version": "1.4.0",
       "author": {
         "name": "AgentPlugins",
         "email": "plugins@example.com"

@@ -9,6 +9,8 @@ user-invocable: true
 Conduct deep research on the codebase to understand how to implement a
 requested feature or fix. Uses project config for subsystem awareness.
 
+Delegation: this step may be delegated per `shared/dify-delegation.md`.
+
 ## Process
 
 ### 1. Load Context

@@ -9,6 +9,8 @@ user-invocable: true
 Finalize a work item: verify everything is clean, create a pull request,
 and optionally merge to main.
 
+Delegation: this step may be delegated per `shared/dify-delegation.md`.
+
 ## Process
 
 ### 1. Load Config

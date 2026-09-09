@@ -9,6 +9,8 @@ user-invocable: true
 Execute the implementation plan step by step. This is the core execution
 step of the RPI workflow.
 
+Delegation: this step may be delegated per `shared/dify-delegation.md`.
+
 ## Process
 
 ### 1. Load Context

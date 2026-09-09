@@ -1,7 +1,7 @@
 {
   "name": "rpi-workflow",
-  "version": "1.3.0",
-  "description": "Research-Plan-Implement workflow framework for structured software development. Provides 8 slash commands (/0-define-work through /7-complete-work) that guide work from definition through PR merge. Project-specific behavior configured via .claude/rpi-config.json. v1.3.0: token-optimized (model-tiered research subagents, shared interview reference, git-state scripts).",
+  "version": "1.4.0",
+  "description": "Research-Plan-Implement workflow framework for structured software development. Provides 8 slash commands (/0-define-work through /7-complete-work) that guide work from definition through PR merge. Project-specific behavior configured via .claude/rpi-config.json. v1.4.0: optional delegation to a write-capable Dify specialist per shared/dify-delegation.md.",
   "author": {
     "name": "AgentPlugins"
   },

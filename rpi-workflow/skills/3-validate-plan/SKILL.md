@@ -9,6 +9,8 @@ user-invocable: true
 Review and validate an implementation plan before execution.
 This is an optional but recommended step of the RPI workflow.
 
+Delegation: this step may be delegated per `shared/dify-delegation.md`.
+
 ## Process
 
 ### 1. Load Context
